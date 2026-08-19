@@ -1,0 +1,4 @@
+"use client";
+import { MessageCircle } from "lucide-react";
+import { motion,useReducedMotion } from "motion/react";
+export function WhatsappButton({number}:{number:string}){const reduce=useReducedMotion();return <motion.a animate={reduce?undefined:{y:[0,-4,0]}} transition={{duration:3.2,repeat:Infinity,ease:"easeInOut"}} href={`https://wa.me/${number}?text=${encodeURIComponent("مرحباً نوفا مودا، أحتاج مساعدة")}`} target="_blank" rel="noreferrer" aria-label="تواصل عبر واتساب" className="group fixed bottom-5 right-4 z-50 flex h-14 items-center gap-2 overflow-hidden rounded-full bg-[#1f9d62] px-4 text-white shadow-[0_18px_45px_rgba(31,157,98,.32)] transition hover:-translate-y-1 sm:bottom-6 sm:right-5"><MessageCircle size={22}/><span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-extrabold opacity-0 transition-all duration-300 group-hover:max-w-32 group-hover:opacity-100">راسلينا واتساب</span></motion.a>}

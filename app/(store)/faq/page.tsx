@@ -1,0 +1,5 @@
+import type { Metadata } from "next";
+import { FaqList } from "@/components/faq-list";
+import { getFaqs, getSettings } from "@/lib/data";
+export const metadata: Metadata = { title: "الأسئلة الشائعة", description: "إجابات عن المقاسات، التوصيل، الاستبدال وطلبات نوفا مودا." };
+export default async function FaqPage(){const [faqs,settings]=await Promise.all([getFaqs(),getSettings()]);return <section className="py-12 sm:py-16"><div className="container-shell grid gap-10 lg:grid-cols-[.7fr_1.3fr]"><div><p className="text-xs font-extrabold tracking-[.14em] text-[#A27E6C]">FAQ</p><h1 className="mt-2 text-[38px] font-extrabold leading-[1.4]">كل شيء واضح قبل الطلب.</h1><p className="mt-4 text-sm leading-8 text-[#7F6B62]">جمعنا أهم الأسئلة اللي تساعدك تختاري وتطلبي بثقة.</p><a href={`https://wa.me/${settings.whatsapp}`} target="_blank" rel="noreferrer" className="mt-6 inline-flex rounded-full bg-[#3D2B24] px-5 py-3 text-sm font-extrabold text-white">عندي سؤال ثاني</a></div><FaqList faqs={faqs}/></div></section>}

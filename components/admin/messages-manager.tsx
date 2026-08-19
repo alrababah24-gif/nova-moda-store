@@ -1,0 +1,16 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, MessageSquareText, Search, Trash2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+
+type Message = { id:string; name:string; phone:string; message:string; read:boolean; created_at:string };
+
+export function MessagesManager({ messages }: { messages: Message[] }) {
+  const router=useRouter(); const [query,setQuery]=useState(""); const [error,setError]=useState("");
+  const filtered=useMemo(()=>messages.filter((m)=>[m.name,m.phone,m.message].join(" ").toLowerCase().includes(query.toLowerCase())),[messages,query]);
+  async function mark(id:string,read:boolean){const supabase=createClient();if(!supabase)return;const {error}=await supabase.from("contact_messages").update({read}).eq("id",id);if(error)setError(error.message);else router.refresh();}
+  async function remove(id:string){if(!confirm("حذف الرسالة؟"))return;const supabase=createClient();if(!supabase)return;const {error}=await supabase.from("contact_messages").delete().eq("id",id);if(error)setError(error.message);else router.refresh();}
+  return <section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-extrabold tracking-[.14em] text-[#A27E6C]">INBOX</p><h1 className="mt-1 text-2xl font-extrabold">رسائل العملاء</h1><p className="mt-1 text-xs text-[#8C7A72]">{messages.filter(m=>!m.read).length} غير مقروءة من أصل {messages.length}</p></div><div className="relative"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C7A72]"/><input value={query} onChange={e=>setQuery(e.target.value)} className="admin-input pr-9 sm:w-72" placeholder="بحث بالاسم أو الهاتف..."/></div></div>{error&&<div className="mt-4 rounded-xl bg-red-50 p-3 text-xs text-red-700">{error}</div>}<div className="mt-5 space-y-3">{filtered.map(m=><article key={m.id} className={`rounded-2xl border p-4 ${m.read?"border-[#EEE1D7] bg-[#FFFCF9]":"border-[#D9BCA8] bg-[#FDF6F0]"}`}><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex items-center gap-2"><MessageSquareText size={15}/><strong className="text-sm">{m.name}</strong>{!m.read&&<span className="h-2 w-2 rounded-full bg-[#C19A7A]"/>}</div><a href={`tel:${m.phone}`} dir="ltr" className="mt-1 block w-fit text-xs font-bold text-[#8C7A72]">{m.phone}</a><p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#5F4A42]">{m.message}</p><p className="mt-3 text-[10px] text-[#9A887F]">{new Date(m.created_at).toLocaleString("ar-JO")}</p></div><div className="flex shrink-0 gap-2"><button onClick={()=>mark(m.id,!m.read)} className="grid h-9 w-9 place-items-center rounded-full border border-[#E3D4CA] bg-white" title={m.read?"تعليم كغير مقروء":"تعليم كمقروء"}><Check size={14}/></button><button onClick={()=>remove(m.id)} className="grid h-9 w-9 place-items-center rounded-full bg-red-50 text-red-600" title="حذف"><Trash2 size={14}/></button></div></div></article>)}{!filtered.length&&<div className="py-16 text-center text-sm text-[#8C7A72]">لا توجد رسائل مطابقة.</div>}</div></section>;
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-label="تطريز يدوي">
+<defs>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F7ECE6"/><stop offset="1" stop-color="#FFFBF7"/></linearGradient>
+ <filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#3D2B24" flood-opacity=".12"/></filter>
+</defs>
+<rect width="900" height="1200" fill="url(#g)"/>
+<circle cx="735" cy="175" r="120" fill="#C19A7A" opacity=".08"/><circle cx="170" cy="940" r="180" fill="#8E6353" opacity=".07"/>
+<g filter="url(#s)" transform="translate(0 20)">
+ <path d="M450 160c-55 0-92 43-92 97v64c-60 42-101 116-120 220l-67 380c-8 45 23 88 68 95 66 11 135 17 211 17s145-6 211-17c45-7 76-50 68-95l-67-380c-19-104-60-178-120-220v-64c0-54-37-97-92-97Z" fill="#8E6353" opacity=".92"/>
+ <path d="M357 323c28 22 59 33 93 33 35 0 66-11 94-33" fill="none" stroke="#FFFBF7" stroke-opacity=".72" stroke-width="7" stroke-linecap="round"/>
+ <path d="M450 357v585" stroke="#FFFBF7" stroke-opacity=".35" stroke-width="5" stroke-dasharray="10 15"/>
+ <path d="M298 542c39 12 73 29 103 51M602 542c-39 12-73 29-103 51" fill="none" stroke="#C19A7A" stroke-width="7" stroke-linecap="round" opacity=".82"/>
+ <path d="M367 175c21 38 47 58 83 58 37 0 63-20 84-58" fill="none" stroke="#C19A7A" stroke-width="6" stroke-linecap="round"/>
+</g>
+<text x="450" y="1100" text-anchor="middle" font-family="Tahoma,Arial,sans-serif" font-size="36" font-weight="700" fill="#3D2B24">تطريز يدوي</text>
+<text x="450" y="1148" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" letter-spacing="5" fill="#9B7E71">NOVA MODA</text>
+</svg>

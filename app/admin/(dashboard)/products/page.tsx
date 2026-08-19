@@ -1,0 +1,5 @@
+import { ProductsManager } from "@/components/admin/products-manager";
+import { CategoriesManager } from "@/components/admin/categories-manager";
+import { requireAdmin } from "@/lib/auth";
+import type { Brand,Category,Product } from "@/lib/types";
+export default async function AdminProductsPage(){const{supabase}=await requireAdmin("catalog");const[{data:products},{data:categories},{data:brands}]=await Promise.all([supabase.from("products").select("*, category:categories(id,name,slug,description,sort_order,active), brand:brands(id,name,slug,tagline,description,logo_url,cover_image,sort_order,active,featured)").order("created_at",{ascending:false}),supabase.from("categories").select("*").order("sort_order"),supabase.from("brands").select("*").order("sort_order")]);return <div className="space-y-5"><CategoriesManager categories={(categories||[]) as Category[]}/><ProductsManager products={(products||[]) as unknown as Product[]} categories={(categories||[]) as Category[]} brands={(brands||[]) as Brand[]}/></div>}
