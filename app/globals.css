@@ -167,12 +167,11 @@ html.dark .store-root .hover\:bg-white:hover{background-color:var(--surface)!imp
 html.dark .store-root .bg-emerald-50{background-color:color-mix(in srgb,var(--success) 10%,var(--surface))!important}
 html.dark .store-root .text-emerald-700,html.dark .store-root .text-emerald-800{color:var(--success)!important}
 
-/* Hero image slider controls */
-.hero-slider-controls{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 12px;pointer-events:none}
-.hero-slider-arrow{pointer-events:auto;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(255,255,255,.82);color:#3D2B24;backdrop-filter:blur(12px);box-shadow:0 8px 25px rgba(0,0,0,.12);transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
-.hero-slider-arrow:hover{transform:scale(1.08);background:#fff;box-shadow:0 12px 30px rgba(0,0,0,.16)}
-.hero-slider-arrow:active{transform:scale(.96)}
-html.dark .hero-slider-arrow{border-color:rgba(255,255,255,.16);background:rgba(17,20,26,.78);color:#F4F5F7;box-shadow:0 10px 28px rgba(0,0,0,.28)}
-html.dark .hero-slider-arrow:hover{background:rgba(24,28,34,.96)}
-@media(max-width:767px){.hero-slider-arrow{width:38px;height:38px}.hero-slider-controls{padding:0 8px}}
-
+/* Hero image slider controls — frame-level so arrows stay visible. */
+.hero-slider-controls{position:absolute;left:0;right:0;top:42%;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 4px;pointer-events:none;transform:translateY(-50%)}
+.hero-slider-arrow{pointer-events:auto;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border:1px solid color-mix(in srgb,var(--brand) 38%,rgba(255,255,255,.7));border-radius:999px;background:rgba(255,255,255,.94);color:#3D2B24;backdrop-filter:blur(14px);box-shadow:0 12px 32px rgba(31,24,20,.18);transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.hero-slider-arrow:hover{transform:scale(1.08);background:#fff;box-shadow:0 16px 38px rgba(31,24,20,.22)}
+.hero-slider-arrow:active{transform:scale(.95)}
+html.dark .hero-slider-arrow{border-color:rgba(255,255,255,.18);background:rgba(17,20,26,.92);color:#F4F5F7;box-shadow:0 12px 34px rgba(0,0,0,.42)}
+html.dark .hero-slider-arrow:hover{background:#20242A}
+@media(max-width:767px){.hero-slider-controls{top:41%;padding:0 1px}.hero-slider-arrow{width:42px;height:42px}}
