@@ -37,7 +37,7 @@ export function ProductCard({ product }: { product: Product }) {
       className="group min-w-0"
     >
       <div className="overflow-hidden rounded-[24px] border border-[var(--line)] bg-[var(--surface)] soft-shadow">
-        <div className="relative aspect-[3/4] overflow-hidden bg-[var(--surface-soft)]">
+        <div className="relative w-full aspect-[4/5] overflow-hidden bg-[var(--surface-soft)] sm:aspect-[3/4]">
           <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0 block">
             <motion.div
               key={`${product.id}-${activeImage}`}
@@ -51,7 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
                 alt={product.name}
                 fill
                 sizes="(max-width:640px) 50vw,(max-width:1024px) 33vw,25vw"
-                className="object-contain p-2 transition duration-500 group-hover:scale-[1.02] sm:p-3"
+                className="object-cover object-center transition duration-500 group-hover:scale-[1.025]"
               />
             </motion.div>
           </Link>

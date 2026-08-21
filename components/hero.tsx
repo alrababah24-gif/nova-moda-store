@@ -64,7 +64,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
           initial={reduce ? false : { opacity: 0, scale: 0.96, x: -22 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.9, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="hero-visual order-1 lg:order-2"
+          className="hero-visual order-1 min-w-0 w-full lg:order-2"
         >
           <div className="hero-fashion-frame">
             <motion.div
@@ -84,7 +84,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
                   alt="عباية مختارة من نوفا مودا"
                   fill
                   priority
-                  className="object-contain p-2 sm:p-3"
+                  className="object-cover object-center"
                   sizes="(max-width: 1024px) 82vw, 480px"
                 />
               </motion.div>
@@ -121,7 +121,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0"
               >
-                <Image src={secondaryImage} alt="تفاصيل عباية نوفا مودا" fill className="object-contain p-1" sizes="190px" />
+                <Image src={secondaryImage} alt="تفاصيل عباية نوفا مودا" fill className="object-cover object-center" sizes="190px" />
               </motion.div>
             </motion.div>
 

@@ -57,16 +57,16 @@ export function ProductDetailClient({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.08fr_.92fr] lg:gap-14">
+    <div className="grid min-w-0 gap-8 lg:grid-cols-[1.08fr_.92fr] lg:gap-14">
       <div>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-[#EFE2D8] bg-[var(--surface-soft)]">
+        <div className="relative mx-auto w-full max-w-[680px] aspect-[4/5] overflow-hidden rounded-[28px] border border-[#EFE2D8] bg-[var(--surface-soft)] sm:aspect-[3/4] lg:max-w-none">
           <Image
             src={images[activeImage]}
             alt={product.name}
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 55vw"
-            className="object-contain p-2 sm:p-4"
+            className="object-cover object-center"
           />
 
           {canSlide && (
@@ -117,7 +117,7 @@ export function ProductDetailClient({
                   src={image}
                   alt={`${product.name} - صورة ${index + 1}`}
                   fill
-                  className="object-contain p-1"
+                  className="object-cover object-center"
                   sizes="80px"
                 />
               </button>
