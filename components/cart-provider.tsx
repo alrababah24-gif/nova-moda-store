@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { CartItem, Product } from "@/lib/types";
+import { getSizeStock } from "@/lib/utils";
 
 type CartContextValue = {
   items: CartItem[];
@@ -37,9 +38,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, hydrated]);
 
   const addItem = useCallback((product: Product, size: string, color?: string, qty = 1) => {
+    const maxStock = Math.max(0, getSizeStock(product, size));
+    if (maxStock <= 0) return;
     setItems((current) => {
       const index = current.findIndex((item) => item.productId === product.id && item.size === size && item.color === color);
-      if (index >= 0) return current.map((item, i) => i === index ? { ...item, qty: Math.min(item.qty + qty, 10) } : item);
+      if (index >= 0) {
+        return current.map((item, i) => i === index
+          ? { ...item, maxStock, qty: Math.min(item.qty + qty, maxStock, 10) }
+          : item);
+      }
       return [...current, {
         productId: product.id,
         name: product.name,
@@ -48,7 +55,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         price: product.price,
         size,
         color,
-        qty,
+        qty: Math.min(qty, maxStock, 10),
+        maxStock,
       }];
     });
     setIsOpen(true);
@@ -59,7 +67,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setItems((current) => current.filter((item) => !(item.productId === productId && item.size === size && item.color === color)));
       return;
     }
-    setItems((current) => current.map((item) => item.productId === productId && item.size === size && item.color === color ? { ...item, qty: Math.min(qty, 10) } : item));
+    setItems((current) => current.map((item) => {
+      if (!(item.productId === productId && item.size === size && item.color === color)) return item;
+      const limit = Math.max(1, Math.min(item.maxStock ?? 10, 10));
+      return { ...item, qty: Math.min(qty, limit) };
+    }));
   }, []);
 
   const removeItem = useCallback((productId: string, size: string, color?: string) => {

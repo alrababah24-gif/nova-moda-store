@@ -19,7 +19,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
     "/products/abaya-classic-beige.svg",
     "/products/abaya-rose-black.svg",
   ];
-  const images = Array.from(new Set([...productImages, ...fallbackImages]));
+  const images = productImages.length ? Array.from(new Set(productImages)) : fallbackImages;
 
   const [activeImage, setActiveImage] = useState(0);
 
@@ -32,7 +32,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
   };
 
   const mainImage = images[activeImage];
-  const secondaryImage = images[(activeImage + 1) % images.length];
+  const secondaryImage = images.length > 1 ? images[(activeImage + 1) % images.length] : mainImage;
 
   return (
     <section className="identity-hero relative overflow-hidden border-b border-[var(--line)]">
@@ -84,13 +84,13 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
                   alt="عباية مختارة من نوفا مودا"
                   fill
                   priority
-                  className="object-cover"
+                  className="object-contain p-2 sm:p-3"
                   sizes="(max-width: 1024px) 82vw, 480px"
                 />
               </motion.div>
             </motion.div>
 
-            <div className="hero-slider-controls" aria-label="التنقل بين صور العبايات">
+            {images.length > 1 && <div className="hero-slider-controls" aria-label="التنقل بين صور العبايات">
               <button
                 type="button"
                 onClick={previousImage}
@@ -107,7 +107,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
               >
                 <ChevronLeft size={24} />
               </button>
-            </div>
+            </div>}
 
             <motion.div
               animate={reduce ? undefined : { y: [0, 7, 0], rotate: [0, 1, 0] }}
@@ -121,7 +121,7 @@ export function Hero({ settings, products = [] }: { settings: StoreSettings; pro
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0"
               >
-                <Image src={secondaryImage} alt="تفاصيل عباية نوفا مودا" fill className="object-cover" sizes="190px" />
+                <Image src={secondaryImage} alt="تفاصيل عباية نوفا مودا" fill className="object-contain p-1" sizes="190px" />
               </motion.div>
             </motion.div>
 

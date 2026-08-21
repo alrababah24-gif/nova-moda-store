@@ -51,7 +51,7 @@ export function ProductCard({ product }: { product: Product }) {
                 alt={product.name}
                 fill
                 sizes="(max-width:640px) 50vw,(max-width:1024px) 33vw,25vw"
-                className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                className="object-contain p-2 transition duration-500 group-hover:scale-[1.02] sm:p-3"
               />
             </motion.div>
           </Link>

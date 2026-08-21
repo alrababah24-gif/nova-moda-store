@@ -15,7 +15,7 @@ import {
   Ruler,
 } from "lucide-react";
 import type { Product, StoreSettings } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, getSizeStock } from "@/lib/utils";
 import { useCart } from "@/components/cart-provider";
 
 export function ProductDetailClient({
@@ -25,17 +25,21 @@ export function ProductDetailClient({
   product: Product;
   settings: StoreSettings;
 }) {
-  const [activeImage, setActiveImage] = useState(0);
-  const [size, setSize] = useState(product.sizes[0] || "M");
-  const [color, setColor] = useState(product.colors[0] || "");
-  const [qty, setQty] = useState(1);
-  const cart = useCart();
-
   const images = product.images.length
     ? product.images.filter(Boolean)
     : ["/products/abaya-classic-beige.svg"];
 
+  const firstAvailableSize = product.sizes.find((value) => getSizeStock(product, value) > 0) || product.sizes[0] || "";
+  const [activeImage, setActiveImage] = useState(0);
+  const [size, setSize] = useState(firstAvailableSize);
+  const [color, setColor] = useState(product.colors[0] || "");
+  const [qty, setQty] = useState(1);
+  const cart = useCart();
+
   const canSlide = images.length > 1;
+  const selectedStock = size ? getSizeStock(product, size) : 0;
+  const maxQty = Math.max(1, Math.min(10, selectedStock));
+  const inStock = selectedStock > 0;
 
   const previousImage = () => {
     if (!canSlide) return;
@@ -47,17 +51,22 @@ export function ProductDetailClient({
     setActiveImage((current) => (current + 1) % images.length);
   };
 
+  function selectSize(value: string) {
+    setSize(value);
+    setQty(1);
+  }
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1.08fr_.92fr] lg:gap-14">
       <div>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-[#EFE2D8] bg-white">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-[#EFE2D8] bg-[var(--surface-soft)]">
           <Image
             src={images[activeImage]}
             alt={product.name}
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 55vw"
-            className="object-cover"
+            className="object-contain p-2 sm:p-4"
           />
 
           {canSlide && (
@@ -87,9 +96,7 @@ export function ProductDetailClient({
                     key={index}
                     onClick={() => setActiveImage(index)}
                     aria-label={`عرض الصورة ${index + 1}`}
-                    className={`h-2 rounded-full transition-all ${
-                      index === activeImage ? "w-6 bg-white" : "w-2 bg-white/60"
-                    }`}
+                    className={`h-2 rounded-full transition-all ${index === activeImage ? "w-6 bg-white" : "w-2 bg-white/60"}`}
                   />
                 ))}
               </div>
@@ -104,15 +111,13 @@ export function ProductDetailClient({
                 type="button"
                 key={`${image}-${index}`}
                 onClick={() => setActiveImage(index)}
-                className={`relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 ${
-                  index === activeImage ? "border-[var(--brand)]" : "border-transparent"
-                }`}
+                className={`relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-[var(--surface-soft)] ${index === activeImage ? "border-[var(--brand)]" : "border-transparent"}`}
               >
                 <Image
                   src={image}
                   alt={`${product.name} - صورة ${index + 1}`}
                   fill
-                  className="object-cover"
+                  className="object-contain p-1"
                   sizes="80px"
                 />
               </button>
@@ -124,10 +129,7 @@ export function ProductDetailClient({
       <div className="lg:sticky lg:top-[165px] lg:self-start">
         <div className="flex flex-wrap items-center gap-2 text-xs font-extrabold text-[var(--brand-strong)]">
           {product.brand ? (
-            <Link
-              href={`/brands/${product.brand.slug}`}
-              className="underline decoration-transparent underline-offset-4 hover:decoration-current"
-            >
+            <Link href={`/brands/${product.brand.slug}`} className="underline decoration-transparent underline-offset-4 hover:decoration-current">
               {product.brand.name}
             </Link>
           ) : (
@@ -137,16 +139,12 @@ export function ProductDetailClient({
           <span className="text-[var(--muted)]">{product.category?.name || "عبايات"}</span>
         </div>
 
-        <h1 className="mt-2 text-[30px] font-extrabold leading-[1.35] sm:text-[38px]">
-          {product.name}
-        </h1>
+        <h1 className="mt-2 text-[30px] font-extrabold leading-[1.35] sm:text-[38px]">{product.name}</h1>
 
         <div className="mt-4 flex items-center gap-3">
           <strong className="text-2xl">{formatPrice(product.price)}</strong>
           {product.compare_at_price && (
-            <span className="text-sm text-[#A99991] line-through">
-              {formatPrice(product.compare_at_price)}
-            </span>
+            <span className="text-sm text-[#A99991] line-through">{formatPrice(product.compare_at_price)}</span>
           )}
         </div>
 
@@ -154,31 +152,48 @@ export function ProductDetailClient({
 
         <div className="mt-7 border-t border-[var(--line)] pt-6">
           <div className="mb-3 flex items-center justify-between">
-            <strong className="text-sm">اختاري المقاس</strong>
-            <Link
-              href="/size-guide"
-              className="flex items-center gap-1 text-xs font-bold text-[var(--muted)]"
-            >
+            <div>
+              <strong className="text-sm">اختاري المقاس</strong>
+              <p className="mt-1 text-[10px] text-[var(--muted)]">الكمية المتوفرة ظاهرة تحت كل مقاس.</p>
+            </div>
+            <Link href="/size-guide" className="flex items-center gap-1 text-xs font-bold text-[var(--muted)]">
               <Ruler size={13} />
               دليل المقاسات
             </Link>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {product.sizes.map((value) => (
-              <button
-                type="button"
-                key={value}
-                onClick={() => setSize(value)}
-                className={`min-w-12 rounded-full border px-4 py-2.5 text-xs font-extrabold ${
-                  size === value
-                    ? "border-[#3D2B24] bg-[#3D2B24] text-white"
-                    : "border-[#E6D7CC] bg-white"
-                }`}
-              >
-                {value}
-              </button>
-            ))}
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {product.sizes.map((value) => {
+              const stock = getSizeStock(product, value);
+              const selected = size === value;
+              return (
+                <button
+                  type="button"
+                  key={value}
+                  disabled={stock <= 0}
+                  onClick={() => selectSize(value)}
+                  className={`rounded-2xl border px-3 py-3 text-right transition ${
+                    selected
+                      ? "border-[#3D2B24] bg-[#3D2B24] text-white"
+                      : stock > 0
+                        ? "border-[#E6D7CC] bg-white hover:border-[var(--brand)]"
+                        : "cursor-not-allowed border-[#EEE5DE] bg-[#F7F3F0] text-[#B6AAA4] opacity-75"
+                  }`}
+                >
+                  <span className="block text-sm font-extrabold">{value}</span>
+                  <span className={`mt-1 block text-[10px] font-bold ${selected ? "text-white/75" : stock > 0 ? "text-[var(--muted)]" : "text-[#B6AAA4]"}`}>
+                    {stock > 0 ? `متوفر ${stock} قطعة` : "نفد المخزون"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+
+          {size && (
+            <div className={`mt-3 rounded-xl px-3 py-2 text-[11px] font-extrabold ${inStock ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+              المقاس {size}: {inStock ? `متوفر حالياً ${selectedStock} قطعة` : "غير متوفر حالياً"}
+            </div>
+          )}
         </div>
 
         {product.colors.length > 0 && (
@@ -190,11 +205,7 @@ export function ProductDetailClient({
                   type="button"
                   key={value}
                   onClick={() => setColor(value)}
-                  className={`rounded-full border px-4 py-2.5 text-xs font-bold ${
-                    color === value
-                      ? "border-[var(--brand)] bg-[#F7ECE5]"
-                      : "border-[#E6D7CC] bg-white"
-                  }`}
+                  className={`rounded-full border px-4 py-2.5 text-xs font-bold ${color === value ? "border-[var(--brand)] bg-[#F7ECE5]" : "border-[#E6D7CC] bg-white"}`}
                 >
                   {color === value && <Check size={12} className="ml-1 inline" />}
                   {value}
@@ -206,18 +217,15 @@ export function ProductDetailClient({
 
         <div className="mt-7 flex gap-3">
           <div className="flex shrink-0 items-center rounded-full border border-[#E6D7CC] bg-white px-2">
-            <button
-              type="button"
-              onClick={() => setQty(Math.max(1, qty - 1))}
-              className="grid h-10 w-9 place-items-center"
-            >
+            <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} className="grid h-10 w-9 place-items-center">
               <Minus size={14} />
             </button>
             <span className="w-7 text-center text-sm font-extrabold">{qty}</span>
             <button
               type="button"
-              onClick={() => setQty(Math.min(10, qty + 1))}
-              className="grid h-10 w-9 place-items-center"
+              disabled={!inStock || qty >= maxQty}
+              onClick={() => setQty(Math.min(maxQty, qty + 1))}
+              className="grid h-10 w-9 place-items-center disabled:cursor-not-allowed disabled:opacity-30"
             >
               <Plus size={14} />
             </button>
@@ -226,18 +234,16 @@ export function ProductDetailClient({
           <button
             type="button"
             onClick={() => cart.addItem(product, size, color, qty)}
-            disabled={product.stock <= 0}
+            disabled={!inStock || !size}
             className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#3D2B24] px-5 text-sm font-extrabold text-white transition hover:bg-[#573C32] disabled:cursor-not-allowed disabled:opacity-45"
           >
             <ShoppingBag size={18} />
-            {product.stock > 0 ? "أضيفي للسلة" : "غير متوفر"}
+            {inStock ? "أضيفي للسلة" : "المقاس غير متوفر"}
           </button>
         </div>
 
         <a
-          href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(
-            `مرحبا نوفا مودا، أريد الاستفسار عن: ${product.name}`
-          )}`}
+          href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(`مرحبا نوفا مودا، أريد الاستفسار عن: ${product.name}`)}`}
           target="_blank"
           rel="noreferrer"
           className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] text-sm font-extrabold"
@@ -247,14 +253,8 @@ export function ProductDetailClient({
         </a>
 
         <div className="mt-6 grid gap-3 rounded-2xl bg-[var(--surface-soft)] p-4 text-xs text-[var(--muted)] sm:grid-cols-2">
-          <span className="flex items-center gap-2">
-            <Truck size={16} />
-            توصيل 24–48 ساعة
-          </span>
-          <span className="flex items-center gap-2">
-            <Check size={16} />
-            فحص المقاس قبل تأكيد الطلب
-          </span>
+          <span className="flex items-center gap-2"><Truck size={16} />توصيل 24–48 ساعة</span>
+          <span className="flex items-center gap-2"><Check size={16} />المخزون مرتبط بالمقاس المختار</span>
         </div>
       </div>
     </div>
