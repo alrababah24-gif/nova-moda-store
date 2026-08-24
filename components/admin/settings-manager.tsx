@@ -5,6 +5,7 @@ import { useMemo, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { uploadMedia } from "@/lib/imagekit-upload-client";
 import type { Product, StoreSettings } from "@/lib/types";
 
 export function SettingsManager({ settings, products }: { settings: StoreSettings; products: Product[] }) {
@@ -22,17 +23,11 @@ export function SettingsManager({ settings, products }: { settings: StoreSetting
   async function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    const supabase = createClient();
-    if (!supabase) return;
     setUploading(true);
     setMessage("");
     try {
-      const ext = file.name.split(".").pop() || "png";
-      const path = `brand/logo-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("brand-assets").upload(path, file, { upsert: false, cacheControl: "3600" });
-      if (error) throw error;
-      const { data } = supabase.storage.from("brand-assets").getPublicUrl(path);
-      setDraft((current) => ({ ...current, logo_url: data.publicUrl }));
+      const uploaded = await uploadMedia(file, "store");
+      setDraft((current) => ({ ...current, logo_url: uploaded.url }));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "تعذر رفع الشعار");
     } finally {

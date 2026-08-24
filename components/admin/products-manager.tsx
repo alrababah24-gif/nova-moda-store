@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import type { Brand, Category, Product } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
+import { uploadMedia } from "@/lib/imagekit-upload-client";
 import { formatPrice, slugify } from "@/lib/utils";
 
 type SizeRow = { size: string; stock: string };
@@ -143,19 +144,13 @@ export function ProductsManager({
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files || []) as File[];
     if (!files.length) return;
-    const supabase = createClient();
-    if (!supabase) return;
     setUploading(true);
     setMessage("");
     try {
       const urls: string[] = [];
       for (const file of files.slice(0, 8 - draft.images.length)) {
-        const ext = file.name.split(".").pop() || "jpg";
-        const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { error } = await supabase.storage.from("product-images").upload(path, file, { cacheControl: "3600", upsert: false });
-        if (error) throw error;
-        const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-        urls.push(data.publicUrl);
+        const uploaded = await uploadMedia(file, "products");
+        urls.push(uploaded.url);
       }
       setDraft((current) => ({ ...current, images: [...current.images, ...urls] }));
     } catch (error) {
