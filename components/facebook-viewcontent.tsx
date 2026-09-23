@@ -1,28 +1,35 @@
 "use client";
 import { useEffect } from "react";
 
-export default function FacebookViewContent({
-  id,
-  name,
-  price,
-}: {
-  id: string;
-  name: string;
-  price: number;
-}) {
+// هذا الكومبوننت بفهم الطريقتين: id/name/price أو productId/productName/value
+type Props = {
+  id?: string;
+  name?: string;
+  price?: number;
+  productId?: string;
+  productName?: string;
+  value?: number;
+  currency?: string;
+};
+
+export default function FacebookViewContent(props: Props) {
   useEffect(() => {
     const fire = () => {
       if (typeof window !== "undefined" && (window as any).fbq) {
-        const cleanId = String(id).trim();
+        // ياخذ الـ ID من أي واحدة موجودة
+        const rawId = props.id || props.productId || "";
+        const cleanId = String(rawId).trim();
         if (!cleanId) return false;
+
+        const rawName = props.name || props.productName || "";
         
-        // نبعت بس الـ ID والنوع - بدون عملة عشان ما يطلع تحذير
+        // بدون عملة عشان ما يطلع تحذير المثلث الأصفر
         (window as any).fbq("track", "ViewContent", {
           content_ids: [cleanId],
           content_type: "product",
-          content_name: String(name || ""),
+          content_name: String(rawName),
         });
-        console.log("✅ ViewContent fired (no currency):", cleanId);
+        console.log("✅ ViewContent fired:", cleanId);
         return true;
       }
       return false;
@@ -35,7 +42,7 @@ export default function FacebookViewContent({
       setTimeout(() => clearInterval(interval), 10000);
       return () => clearInterval(interval);
     }
-  }, [id, name, price]);
+  }, [props.id, props.productId, props.name, props.productName, props.price, props.value]);
 
   return null;
 }
