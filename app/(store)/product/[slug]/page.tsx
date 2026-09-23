@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductDetailClient } from "@/components/product-detail-client";
 import { ProductGrid } from "@/components/product-grid";
-import FacebookViewContent from "../../../components/facebook-viewcontent";
+import FacebookViewContent from "@/components/facebook-viewcontent";
 import { getCategories, getProductBySlug, getProducts, getSettings } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 
