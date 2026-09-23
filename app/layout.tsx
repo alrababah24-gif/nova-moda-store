@@ -13,7 +13,7 @@ const tajawal = Tajawal({
 
 export const metadata: Metadata = {
   title: "Nova Moda - عبايات عصرية",
-  description: "متجر عبايات عصرية",
+  description: "متجر عبايات عصرية ون فاخرة - توصيل لجميع محافظات الأردن",
 };
 
 export default function RootLayout({
