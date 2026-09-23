@@ -1,12 +1,6 @@
 "use client";
 import { useEffect } from "react";
 
-declare global {
-  interface Window {
-    fbq: (...args: any[]) => void;
-  }
-}
-
 export default function FacebookViewContent({
   id,
   name,
@@ -14,18 +8,17 @@ export default function FacebookViewContent({
 }: {
   id: string;
   name: string;
-  price: number;
+  price: any;
 }) {
   useEffect(() => {
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", "ViewContent", {
+    if (typeof window !== "undefined" && (window as any).fbq) {
+      (window as any).fbq("track", "ViewContent", {
         content_ids: [id],
         content_name: name,
         content_type: "product",
-        value: price,
+        value: Number(price) || 0,
         currency: "JOD",
       });
-      // console.log("ViewContent sent for", id);
     }
   }, [id, name, price]);
 
