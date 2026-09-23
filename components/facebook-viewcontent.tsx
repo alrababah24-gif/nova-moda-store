@@ -1,46 +1,41 @@
-"use client"
+"use client";
+import { useEffect } from "react";
 
-import { useEffect } from "react"
-
-type Props = {
-  productId: string
-  productName: string
-  value: number
-  currency?: string
-}
-
-export default function FacebookViewContent({ productId, productName, value, currency = "JOD" }: Props) {
+export default function FacebookViewContent({
+  id,
+  name,
+  price,
+}: {
+  id: string;
+  name: string;
+  price: number;
+}) {
   useEffect(() => {
     const fire = () => {
       if (typeof window !== "undefined" && (window as any).fbq) {
-        // تأكد القيمة رقم والعملة 3 أحرف كابيتال
-        const cleanValue = Number(value) || 0
-        const cleanCurrency = (currency || "JOD").toUpperCase().trim()
-        const cleanId = String(productId).trim()
-
-        if (!cleanId) return false
-
-        ;(window as any).fbq("track", "ViewContent", {
+        const cleanId = String(id).trim();
+        if (!cleanId) return false;
+        
+        // نبعت بس الـ ID والنوع - بدون عملة عشان ما يطلع تحذير
+        (window as any).fbq("track", "ViewContent", {
           content_ids: [cleanId],
-          content_name: String(productName || ""),
           content_type: "product",
-          value: cleanValue,
-          currency: cleanCurrency,
-        })
-        console.log("✅ ViewContent fired:", cleanId, cleanValue, cleanCurrency)
-        return true
+          content_name: String(name || ""),
+        });
+        console.log("✅ ViewContent fired (no currency):", cleanId);
+        return true;
       }
-      return false
-    }
+      return false;
+    };
 
     if (!fire()) {
       const interval = setInterval(() => {
-        if (fire()) clearInterval(interval)
-      }, 500)
-      setTimeout(() => clearInterval(interval), 10000)
-      return () => clearInterval(interval)
+        if (fire()) clearInterval(interval);
+      }, 500);
+      setTimeout(() => clearInterval(interval), 10000);
+      return () => clearInterval(interval);
     }
-  }, [productId, productName, value, currency])
+  }, [id, name, price]);
 
-  return null
+  return null;
 }
