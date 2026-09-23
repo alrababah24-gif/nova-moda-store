@@ -1,26 +1,33 @@
 "use client"
+
 import { useEffect } from "react"
 
-export default function FacebookViewContent(props: any) {
-  // يقبل أي اسم للـ props عشان ما يفشل الـ Build
-  const productId = props.productId || props.id || props.content_id || "unknown"
-  const productName = props.productName || props.name || props.content_name || ""
-  const value = props.value || props.price || 0
-  const currency = props.currency || "JOD"
+type Props = {
+  productId: string
+  productName: string
+  value: number
+  currency?: string
+}
 
+export default function FacebookViewContent({ productId, productName, value, currency = "JOD" }: Props) {
   useEffect(() => {
     const fire = () => {
-      // @ts-ignore
-      if (typeof window !== "undefined" && window.fbq) {
-        // @ts-ignore
-        window.fbq("track", "ViewContent", {
-          content_ids: [productId],
-          content_name: productName,
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        // تأكد القيمة رقم والعملة 3 أحرف كابيتال
+        const cleanValue = Number(value) || 0
+        const cleanCurrency = (currency || "JOD").toUpperCase().trim()
+        const cleanId = String(productId).trim()
+
+        if (!cleanId) return false
+
+        ;(window as any).fbq("track", "ViewContent", {
+          content_ids: [cleanId],
+          content_name: String(productName || ""),
           content_type: "product",
-          value: Number(value),
-          currency: currency,
+          value: cleanValue,
+          currency: cleanCurrency,
         })
-        console.log("✅ ViewContent fired:", productId)
+        console.log("✅ ViewContent fired:", cleanId, cleanValue, cleanCurrency)
         return true
       }
       return false
