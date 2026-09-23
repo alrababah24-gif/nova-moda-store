@@ -17,7 +17,6 @@ import {
 import type { Product, StoreSettings } from "@/lib/types";
 import { formatPrice, getSizeStock } from "@/lib/utils";
 import { useCart } from "@/components/cart-provider";
-import FacebookViewContent from "@/components/facebook-viewcontent";
 
 export function ProductDetailClient({
   product,
@@ -41,12 +40,6 @@ export function ProductDetailClient({
 
   return (
     <>
-      <FacebookViewContent
-        productId={p.slug || p.id}
-        productName={p.name}
-        value={p.price}
-        currency="JOD"
-      />
       <div className="grid min-w-0 gap-8 lg:grid-cols-[1.08fr_.92fr] lg:gap-14">
         <div className="min-w-0">
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[var(--surface-soft)]">
