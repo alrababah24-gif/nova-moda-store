@@ -1,17 +1,19 @@
 "use client"
-
 import { useEffect } from "react"
 
-type Props = {
+export default function FacebookViewContent({ 
+  productId, 
+  productName, 
+  value, 
+  currency = "JOD" 
+}: { 
   productId: string
   productName: string
   value: number
   currency?: string
-}
-
-export default function FacebookViewContent({ productId, productName, value, currency = "JOD" }: Props) {
+}) {
   useEffect(() => {
-    const checkFbq = setInterval(() => {
+    const fire = () => {
       if (typeof window !== "undefined" && (window as any).fbq) {
         (window as any).fbq("track", "ViewContent", {
           content_ids: [productId],
@@ -19,14 +21,22 @@ export default function FacebookViewContent({ productId, productName, value, cur
           content_type: "product",
           value: value,
           currency: currency,
-        });
-        clearInterval(checkFbq);
+        })
+        console.log("✅ ViewContent fired:", productId)
+        return true
       }
-    }, 500);
+      return false
+    }
 
-    setTimeout(() => clearInterval(checkFbq), 10000);
-
-    return () => clearInterval(checkFbq);
+    // حاول فوراً
+    if (!fire()) {
+      // لو fbq لسه ما حمل، استنى
+      const interval = setInterval(() => {
+        if (fire()) clearInterval(interval)
+      }, 500)
+      setTimeout(() => clearInterval(interval), 10000)
+      return () => clearInterval(interval)
+    }
   }, [productId, productName, value, currency])
 
   return null
