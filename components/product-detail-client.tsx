@@ -6,57 +6,103 @@ import FacebookViewContent from "@/components/facebook-viewcontent"
 import { useCart } from "@/components/cart-provider"
 
 export function ProductDetailClient({ product, settings }: any) {
-  const [size, setSize] = useState("")
   const [qty, setQty] = useState(1)
-  const [img, setImg] = useState(0)
   const cart = useCart()
+  const [selectedSize, setSelectedSize] = useState<string>("")
+  const [activeImg, setActiveImg] = useState(0)
 
   const images = product?.images?.length ? product.images : ["/placeholder.svg"]
-  const sizes = product?.sizes || []
+  const sizes: string[] = product?.sizes || []
   const price = product?.price || 0
+  const compareAt = product?.compare_at_price
 
   return (
     <>
-      <FacebookViewContent
-        productId={product?.slug || product?.id || "unknown"}
-        productName={product?.name || ""}
-        value={Number(price)}
-        currency="JOD"
-      />
+      {/* هذا السطر هو اللي بيرجع ViewContent وبيصلح الجودة */}
+      <FacebookViewContent product={product} />
 
-      <div className="grid gap-8 lg:grid-cols-[1.08fr_.92fr] p-6">
+      <div className="grid md:grid-cols-[1.05fr_1fr] gap-8 md:gap-12">
+        {/* الصور */}
         <div>
-          <div className="relative aspect-[4/5] bg-gray-100 rounded-2xl overflow-hidden">
-            <Image src={images[img]} alt={product?.name || ""} fill className="object-cover" />
+          <div className="relative aspect-[4/5] rounded-[20px] overflow-hidden bg-[#f6f6f6]">
+            <Image
+              src={images[activeImg]}
+              alt={product?.name || "product"}
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
-          <div className="flex gap-2 mt-3 overflow-auto">
-            {images.map((im: string, i: number) => (
-              <button key={i} onClick={() => setImg(i)} className={`relative w-20 h-20 rounded-xl overflow-hidden border ${img===i?"border-black":"border-transparent"}`}>
-                <Image src={im} alt="" fill className="object-cover" />
-              </button>
-            ))}
-          </div>
+
+          {images.length > 1 && (
+            <div className="flex gap-2 mt-3 overflow-auto">
+              {images.map((img: string, i: number) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImg(i)}
+                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 ${activeImg === i ? "border-black" : "border-transparent"}`}
+                >
+                  <Image src={img} alt="" fill className="object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div>
-          <Link href="/products" className="text-sm text-gray-500">← العودة</Link>
-          <h1 className="text-2xl font-bold mt-3">{product?.name}</h1>
-          <div className="text-xl font-bold mt-2">{price} JOD</div>
-          
+        {/* التفاصيل */}
+        <div className="px-1">
+          <Link href="/products" className="text-sm text-gray-500 hover:text-black">
+            ← العودة للمنتجات
+          </Link>
+
+          <h1 className="text-[22px] font-bold mt-3 leading-tight">{product?.name}</h1>
+
+          <div className="mt-3 flex items-baseline gap-3">
+            <span className="text-xl font-bold">{price} JOD</span>
+            {compareAt && compareAt > price && (
+              <span className="text-sm text-gray-400 line-through">{compareAt} JOD</span>
+            )}
+          </div>
+
           {sizes.length > 0 && (
             <div className="mt-6">
-              <div className="text-sm mb-2">المقاس</div>
+              <div className="text-sm mb-2 font-medium">المقاس</div>
               <div className="flex gap-2 flex-wrap">
                 {sizes.map((s: string) => (
-                  <button key={s} onClick={()=>setSize(s)} className={`px-4 h-10 rounded-full border text-sm ${size===s?"bg-black text-white":"bg-white"}`}>{s}</button>
+                  <button
+                    key={s}
+                    onClick={() => setSelectedSize(s)}
+                    className={`px-4 h-10 rounded-full border text-sm transition ${
+                      selectedSize === s ? "bg-black text-white border-black" : "bg-white border-gray-200"
+                    }`}
+                  >
+                    {s}
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
-          <button onClick={()=>cart.addItem(product, size, "", qty)} className="mt-6 w-full h-12 bg-[#3D2B24] text-white rounded-full">
-            أضيفي للسلة
-          </button>
+          <div className="flex gap-3 mt-8">
+            <div className="flex items-center border rounded-full h-12 px-1">
+              <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 h-10">-</button>
+              <span className="w-8 text-center text-sm">{qty}</span>
+              <button onClick={() => setQty(qty + 1)} className="w-10 h-10">+</button>
+            </div>
+
+            <button
+              onClick={() => cart.addToCart(product, selectedSize, qty)}
+              className="flex-1 h-12 rounded-full bg-black text-white font-medium hover:bg-zinc-800 transition"
+            >
+              أضف للسلة
+            </button>
+          </div>
+
+          {product?.description && (
+            <div className="mt-8 text-sm text-gray-600 leading-7 whitespace-pre-line">
+              {product.description}
+            </div>
+          )}
         </div>
       </div>
     </>
