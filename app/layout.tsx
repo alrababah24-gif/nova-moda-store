@@ -115,9 +115,7 @@ const metaPixelScript = `
   'https://connect.facebook.net/en_US/fbevents.js'
 );
 
-fbq('init', '1676852253417182');
-fbq('track', 'PageView');
-`;
+
 
 export default function RootLayout({
   children,
@@ -138,31 +136,13 @@ export default function RootLayout({
           }}
         />
 
-        {/* Meta Pixel */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: metaPixelScript,
-          }}
-        />
+  
       </head>
 
       <body
-        className={`${tajawal.className} min-h-screen`}
-      >
-        {/* Meta Pixel fallback */}
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src="https://www.facebook.com/tr?id=1676852253417182&ev=PageView&noscript=1"
-            alt=""
-          />
-        </noscript>
-
-        {/* تتبع التنقل داخل الموقع */}
-        <MetaPixel />
-
+        className={`${tajawal.className} min-h-screen`}>
+          <MetaPixel />
+     
         <CartProvider>
           {children}
         </CartProvider>
