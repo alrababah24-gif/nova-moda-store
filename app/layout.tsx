@@ -23,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${tajawal.className} min-h-screen`}>
+      <body className={tajawal.className}>
         <MetaPixel />
         <CartProvider>
           {children}
