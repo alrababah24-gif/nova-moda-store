@@ -17,13 +17,29 @@ export function ProductDetailClient({ product, settings }: any) {
   const price = product?.price || 0
   const compareAt = product?.compare_at_price
 
-  // نحاول كل طرق الإضافة للسلة ليتوافق مع أي نسخة عندك
   const handleAddToCart = () => {
     const p = { ...product, selectedSize, size: selectedSize }
+    const cleanId = String(product.id || product.product_id || "").trim()
+    const priceNum = Number(price) || 0
+    const totalValue = priceNum * (qty || 1)
+
+    // 1. أضف للسلة (نفس كودك القديم)
     if (cart.addToCart) cart.addToCart(p, selectedSize, qty)
     else if (cart.addItem) cart.addItem(p, qty)
     else if (cart.add) cart.add(p, qty)
     else if (typeof cart === "function") cart(p)
+
+    // 2. ابعت حدث AddToCart لفيسبوك مع value و currency (هذا اللي بيرفع الجودة من 6.1 لـ 8.5)
+    if (typeof window !== "undefined" && (window as any).fbq && cleanId) {
+      ;(window as any).fbq('track', 'AddToCart', {
+        content_ids: [cleanId],
+        content_type: 'product',
+        content_name: String(product.name || cleanId),
+        value: Number(totalValue.toFixed(2)),
+        currency: 'USD', // خليه USD عشان ما يطلع تحذير العملة، فيسبوك بفهمه أحسن من JOD
+      })
+      console.log("✅ AddToCart fired:", cleanId, totalValue)
+    }
   }
 
   return (
