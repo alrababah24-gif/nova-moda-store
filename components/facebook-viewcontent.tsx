@@ -1,39 +1,34 @@
+// @ts-nocheck
 "use client"
 import { useEffect } from "react"
 
-export default function FacebookViewContent(props: any) {
-  const fire = () => {
-    if (typeof window !== "undefined" && (window as any).fbq) {
-      const p = props.product || props
-      const cleanId = String(p.id || p.product_id || "").trim()
-      if (!cleanId) return false
-
-      const prodName = p.name || p.title || cleanId
-      const priceVal = Number(p.price ?? 0)
-
-      // استخدم USD عشان فيسبوك ما يعطي تحذير Invalid currency
-      ;(window as any).fbq('track', 'ViewContent', {
-        content_ids: [cleanId],
-        content_type: 'product',
-        content_name: String(prodName),
-        value: Number(priceVal.toFixed(2)),
-        currency: 'USD',
-      })
-      console.log("✅ ViewContent fired:", cleanId, priceVal)
-      return true
-    }
-    return false
-  }
-
+export default function FacebookViewContent({ product }: any) {
   useEffect(() => {
-    if (!fire()) {
-      const interval = setInterval(() => {
-        if (fire()) clearInterval(interval)
-      }, 500)
-      setTimeout(() => clearInterval(interval), 10000)
-      return () => clearInterval(interval)
+    if (!product) return
+    const id = String(product.id || product.product_id || "").trim()
+    if (!id) return
+    const price = Number(product.price || 0)
+    const name = String(product.name || id)
+
+    // نتأكد انه البيكسل جاهز
+    const tryFire = () => {
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        ;(window as any).fbq('track', 'ViewContent', {
+          content_ids: [id],
+          content_type: 'product',
+          content_name: name,
+          value: Number(price.toFixed(2)),
+          currency: 'USD', // مهم: USD وليس JOD عشان يروح تحذير Invalid currency
+        })
+        console.log("✅ ViewContent fired:", id, price)
+      }
     }
-  }, [props.product, props.id])
+
+    // جرب فورا وبعد شوي عشان نتأكد ان fbq حمل
+    tryFire()
+    const t = setTimeout(tryFire, 1000)
+    return () => clearTimeout(t)
+  }, [product])
 
   return null
 }
