@@ -1,101 +1,36 @@
 // @ts-nocheck
 "use client"
-import Image from "next/image"
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import FacebookViewContent from "@/components/facebook-viewcontent"
-import { useCart } from "@/components/cart-provider"
+import { useState } from "react"
 
-export function ProductDetailClient({ product, settings }: any) {
-  const [qty, setQty] = useState(1)
-  const cart: any = useCart()
-  const [selectedSize, setSelectedSize] = useState("")
-  const [activeImg, setActiveImg] = useState(0)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  // فلتر الصور الفاضية اللي بتعمل 400
-  const rawImages = product?.images || []
-  const filtered = rawImages.filter((u: string) => u && u.startsWith("http"))
-  const images = filtered.length ? filtered : ["/placeholder.svg"]
-  const sizes: string[] = product?.sizes || []
-  const price = product?.price || 0
-  const compareAt = product?.compare_at_price
-
-  const handleAddToCart = () => {
-    const p = { ...product, selectedSize, size: selectedSize }
-    const cleanId = String(product.id || product.product_id || "").trim()
-    const totalValue = (Number(price) || 0) * (qty || 1)
-    if (cart.addToCart) cart.addToCart(p, selectedSize, qty)
-    else if (cart.addItem) cart.addItem(p, qty)
-    else if (cart.add) cart.add(p, qty)
-    if (typeof window !== "undefined" && (window as any).fbq && cleanId) {
-      (window as any).fbq('track', 'AddToCart', {
-        content_ids: [cleanId],
-        content_type: 'product',
-        content_name: String(product.name || cleanId),
-        value: Number(totalValue.toFixed(2)),
-        currency: 'USD',
-      })
-      console.log("AddToCart fired", cleanId, totalValue)
-    }
-  }
+export default function ProductDetailClientFINAL({ product }: any) {
+  const [imgError, setImgError] = useState<Record<string, boolean>>({})
+  const images = product?.images || product?.image_urls || []
 
   return (
-    <>
-      <FacebookViewContent product={product} />
-      <div className="grid md:grid-cols-[1.05fr_1fr] gap-8">
-        <div>
-          <div className="relative aspect-[4/5] rounded-[20px] overflow-hidden bg-[#f6f6f6]">
-            {mounted && (
-              <Image
-                src={images[activeImg]}
-                alt={product?.name || "product"}
-                fill
-                className="object-cover"
-                priority
-                unoptimized
-              />
-            )}
-          </div>
-          {mounted && images.length > 1 && (
-            <div className="flex gap-2 mt-3 overflow-auto">
-              {images.map((img: string, i: number) => (
-                <button key={i} onClick={() => setActiveImg(i)} className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 ${activeImg===i ? "border-black":"border-transparent"}`}>
-                  <Image src={img} alt="" fill className="object-cover" unoptimized />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="px-1">
-          <Link href="/products" className="text-sm text-gray-500">← العودة للمنتجات</Link>
-          <h1 className="text-[22px] font-bold mt-3">{product?.name}</h1>
-          <div className="mt-3 flex gap-3">
-            <span className="text-xl font-bold">{price} JOD</span>
-            {compareAt > price && <span className="text-sm text-gray-400 line-through">{compareAt} JOD</span>}
-          </div>
-          {sizes.length > 0 && (
-            <div className="mt-6">
-              <div className="text-sm mb-2">المقاس</div>
-              <div className="flex gap-2 flex-wrap">
-                {sizes.map((s: string) => (
-                  <button key={s} onClick={() => setSelectedSize(s)} className={`px-4 h-10 rounded-full border text-sm ${selectedSize===s ? "bg-black text-white":"bg-white"}`}>{s}</button>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="flex gap-3 mt-8">
-            <div className="flex items-center border rounded-full h-12 px-1">
-              <button onClick={() => setQty(Math.max(1, qty-1))} className="w-10 h-10">-</button>
-              <span className="w-8 text-center text-sm">{qty}</span>
-              <button onClick={() => setQty(qty+1)} className="w-10 h-10">+</button>
-            </div>
-            <button onClick={handleAddToCart} className="flex-1 h-12 rounded-full bg-black text-white">أضف للسلة</button>
-          </div>
-          {product?.description && <div className="mt-8 text-sm text-gray-600 whitespace-pre-line">{product.description}</div>}
-        </div>
+    <div className="grid md:grid-cols-2 gap-8">
+      <div className="space-y-4">
+        {images.map((img: string, i: number) => {
+          if (imgError[img]) return null
+          // استخدم img عادي بدل Next Image عشان ImageKit 400 ما يوقف الصفحة
+          return (
+            <img
+              key={i}
+              src={img}
+              alt={product?.name || 'product'}
+              className="w-full h-auto object-cover rounded"
+              loading="lazy"
+              onError={() => setImgError(prev => ({ ...prev, [img]: true }))}
+            />
+          )
+        })}
+        {images.length === 0 && (
+          <div className="bg-gray-100 h-[400px] flex items-center justify-center">لا يوجد صور</div>
+        )}
       </div>
-    </>
+      <div>
+        <h1 className="text-2xl font-bold">{product?.name}</h1>
+        <p className="text-xl mt-2">{product?.price} {product?.currency || 'JOD'}</p>
+      </div>
+    </div>
   )
 }
