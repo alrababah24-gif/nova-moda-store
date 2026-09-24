@@ -1,34 +1,15 @@
-// هذا الملف تحطه في app/(store)/page.tsx
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import { BrandRail } from "@/components/brand-rail";
-import { ProductGrid } from "@/components/product-grid";
-import { ExperienceBento } from "@/components/experience-bento";
-import { Hero } from "@/components/hero";
-import Link from "next/link";
-
-export default function HomePage() {
+export default function Page() {
   return (
-    <div className="bg-white min-h-screen">
-      {/* الشريط العلوي للبراندات */}
-      <BrandRail />
-      
-      {/* الهيرو */}
-      <Hero />
-
-      {/* المنتجات */}
-      <section className="py-14">
-        <div className="container mx-auto px-4">
-          <div className="mb-8 flex justify-between items-center">
-            <h2 className="text-[34px] font-bold">عبايات مصممة بعناية</h2>
-            <Link href="/shop" className="text-black underline">كل المنتجات</Link>
-          </div>
-          <ProductGrid />
-        </div>
-      </section>
-
-      <ExperienceBento />
+    <div style={{ minHeight: '100vh', background: 'white', padding: '80px 20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+      <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '20px' }}>Nova Moda Abaya</h1>
+      <p style={{ color: '#666', marginBottom: '30px' }}>الموقع شغال الآن ✅</p>
+      <p style={{ color: '#999', fontSize: '14px' }}>جاري استرجاع المنتجات... الصفحة سترجع خلال دقائق</p>
+      <div style={{ marginTop: '40px' }}>
+        <a href="/" style={{ background: 'black', color: 'white', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>تحديث الصفحة</a>
+      </div>
     </div>
   );
 }
