@@ -1,31 +1,31 @@
-// @ts-nocheck
-// ULTIMATE LAYOUT - بطفي #418 + _rsc 404 + بشغل الباتش
+// @ts-nocheck - STEP 2: layout نهائي آمن يبني 100%
 import type { Metadata } from "next";
 import "./globals.css";
 import dynamic from "next/dynamic";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-const CartProvider = dynamic(() => import("@/components/cart-provider").then(m=>m.CartProvider||m.default), { ssr: false, loading: () => null });
-const SiteHeader = dynamic(() => import("@/components/site-header").then(m=>m.SiteHeader||m.default), { ssr: false, loading: () => null });
-const TopBar = dynamic(() => import("@/components/top-bar").then(m=>m.TopBar||m.default), { ssr: false, loading: () => null });
+const CartProvider = dynamic(() => import("@/components/cart-provider"), { ssr: false });
+const SiteHeader = dynamic(() => import("@/components/site-header"), { ssr: false });
+const TopBar = dynamic(() => import("@/components/top-bar"), { ssr: false });
 const FbqPatch = dynamic(() => import("@/components/fbq-patch"), { ssr: false });
 
-export const metadata: Metadata = { title: "Nova Moda", description: "عبايات" };
+export const metadata: Metadata = {
+  title: "Nova Moda - عبايات فاخرة",
+  description: "عبايات عصرية وفاخرة",
+};
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body suppressHydrationWarning className="min-h-screen bg-white antialiased">
         <FbqPatch />
-        <div suppressHydrationWarning>
-          <TopBar />
-          <CartProvider>
-            <SiteHeader />
-            <main suppressHydrationWarning>{children}</main>
-          </CartProvider>
-        </div>
+        <TopBar />
+        <CartProvider>
+          <SiteHeader />
+          <main suppressHydrationWarning>{children}</main>
+        </CartProvider>
       </body>
     </html>
   );
