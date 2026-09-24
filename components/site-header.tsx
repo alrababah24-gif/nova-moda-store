@@ -1,26 +1,76 @@
 // @ts-nocheck
+// EMERGENCY - بيرجع الموقع أونلاين فورا
 "use client"
-import { useCart } from "./cart-provider"
-import Link from "next/link"
-import { ShoppingBag } from "lucide-react"
+import { createContext, useContext, useEffect, useState, useMemo } from "react"
 
-export default function SiteHeader() {
-  const cart = useCart() as any
-  const count = cart?.count ?? cart?.cartCount ?? 0
-  const mounted = cart?.mounted ?? false
+const CartContext = createContext<any>({
+  items: [],
+  cartItems: [],
+  count: 0,
+  total: 0,
+  subtotal: 0,
+  mounted: false,
+  addToCart: () => {},
+  removeFromCart: () => {},
+  updateQty: () => {},
+  clearCart: () => {},
+  setIsOpen: () => {},
+  isOpen: false,
+  open: false,
+})
 
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="flex h-16 items-center justify-between px-4">
-        <Link href="/" className="font-bold text-xl">Nova Moda</Link>
-        <Link href="/cart" className="relative">
-          <ShoppingBag className="h-6 w-6" />
-          {/* مهم جدا لحل React #418 - لا تعرض العدد إلا بعد التحميل */}
-          <span suppressHydrationWarning className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {mounted ? count : 0}
-          </span>
-        </Link>
-      </div>
-    </header>
-  )
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [items, setItems] = useState<any[]>([])
+  const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    try {
+      const raw = localStorage.getItem("nova-cart")
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) setItems(parsed)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    try {
+      localStorage.setItem("nova-cart", JSON.stringify(items))
+    } catch {}
+  }, [items, mounted])
+
+  const count = useMemo(() => items.reduce((s, it) => s + (it.qty || it.quantity || 1), 0), [items])
+  const total = useMemo(() => items.reduce((s, it) => s + Number(it.price || 0) * (it.qty || it.quantity || 1), 0), [items])
+
+  const value = {
+    items,
+    cartItems: items,
+    count,
+    total,
+    subtotal: total,
+    totalPrice: total,
+    mounted,
+    isOpen,
+    open: isOpen,
+    setIsOpen,
+    setOpen: setIsOpen,
+    addToCart: (p: any, size?: string, qty = 1) => {
+      setItems(prev => [...prev, { ...p, selectedSize: size, qty, quantity: qty }])
+      setIsOpen(true)
+    },
+    removeFromCart: (id: string) => setItems(prev => prev.filter(it => String(it.id) !== String(id))),
+    updateQty: () => {},
+    clearCart: () => setItems([]),
+  }
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
+
+export function useCart() {
+  return useContext(CartContext)
+}
+
+export default CartProvider
