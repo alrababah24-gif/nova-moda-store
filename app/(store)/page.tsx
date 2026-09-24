@@ -1,15 +1,25 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+import dynamic from "next/dynamic";
+
+const BrandRail = dynamic(() => import("@/components/brand-rail").then(m => (m as any).BrandRail || (m as any).default), { ssr: false, loading: () => null });
+const ProductGrid = dynamic(() => import("@/components/product-grid").then(m => (m as any).ProductGrid || (m as any).default), { ssr: false, loading: () => null });
+const ExperienceBento = dynamic(() => import("@/components/experience-bento").then(m => (m as any).ExperienceBento || (m as any).default), { ssr: false, loading: () => null });
+const Hero = dynamic(() => import("@/components/hero").then(m => (m as any).Hero || (m as any).default), { ssr: false, loading: () => null });
+
 export default function Page() {
   return (
-    <div style={{ minHeight: '100vh', background: 'white', padding: '80px 20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '20px' }}>Nova Moda Abaya</h1>
-      <p style={{ color: '#666', marginBottom: '30px' }}>الموقع شغال الآن ✅</p>
-      <p style={{ color: '#999', fontSize: '14px' }}>جاري استرجاع المنتجات... الصفحة سترجع خلال دقائق</p>
-      <div style={{ marginTop: '40px' }}>
-        <a href="/" style={{ background: 'black', color: 'white', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none' }}>تحديث الصفحة</a>
-      </div>
+    <div className="bg-white min-h-screen">
+      <BrandRail />
+      <Hero />
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-[30px] font-bold mb-6">عبايات مصممة بعناية</h2>
+          <ProductGrid />
+        </div>
+      </section>
+      <ExperienceBento />
     </div>
   );
 }
