@@ -1,18 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    // يخلي الـ Build ينجح حتى لو في أخطاء Typescript مثل item.qty
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  reactStrictMode: true,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: '**' },
+      { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "ik.imagekit.io" },
     ],
   },
+  poweredByHeader: false,
 };
 
 export default nextConfig;

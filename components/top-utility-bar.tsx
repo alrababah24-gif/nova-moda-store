@@ -70,10 +70,12 @@ function formatBusinessTime(value: string) {
 }
 
 export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
-  const [now, setNow] = useState(() => new Date());
+  // Starts empty so server HTML and the first client render match (avoids React hydration error #418).
+  const [now, setNow] = useState<Date | null>(null);
   const [weather, setWeather] = useState<WeatherPayload | null>(null);
 
   useEffect(() => {
+    setNow(new Date());
     const timer = window.setInterval(() => setNow(new Date()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
@@ -100,7 +102,7 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
 
   const dateLabel = useMemo(
     () =>
-      new Intl.DateTimeFormat("ar-JO-u-nu-latn", {
+      now && new Intl.DateTimeFormat("ar-JO-u-nu-latn", {
         timeZone: AMMAN_TIMEZONE,
         weekday: "short",
         day: "numeric",
@@ -110,7 +112,7 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
   );
   const timeLabel = useMemo(
     () =>
-      new Intl.DateTimeFormat("ar-JO-u-nu-latn", {
+      now && new Intl.DateTimeFormat("ar-JO-u-nu-latn", {
         timeZone: AMMAN_TIMEZONE,
         hour: "numeric",
         minute: "2-digit",
@@ -136,11 +138,11 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
             </div>
             <div className="status-chip">
               <span className="status-icon"><Clock3 size={13} /></span>
-              <span><b>{timeLabel}</b><small>بتوقيت عمّان</small></span>
+              <span><b>{timeLabel || "--:--"}</b><small>بتوقيت عمّان</small></span>
             </div>
             <div className="status-chip">
               <span className="status-icon"><CalendarDays size={13} /></span>
-              <span><b>{dateLabel}</b><small>التاريخ اليوم</small></span>
+              <span><b>{dateLabel || "—"}</b><small>التاريخ اليوم</small></span>
             </div>
             <div className="status-chip">
               <span className="status-icon"><WeatherIcon size={14} /></span>
