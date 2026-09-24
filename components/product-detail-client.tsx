@@ -1,36 +1,20 @@
 // @ts-nocheck
+// EMERGENCY - هيدر بدون سلة عشان ما يوقع الموقع
 "use client"
-import { useState } from "react"
+import Link from "next/link"
 
-export default function ProductDetailClientFINAL({ product }: any) {
-  const [imgError, setImgError] = useState<Record<string, boolean>>({})
-  const images = product?.images || product?.image_urls || []
-
+export function SiteHeader() {
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      <div className="space-y-4">
-        {images.map((img: string, i: number) => {
-          if (imgError[img]) return null
-          // استخدم img عادي بدل Next Image عشان ImageKit 400 ما يوقف الصفحة
-          return (
-            <img
-              key={i}
-              src={img}
-              alt={product?.name || 'product'}
-              className="w-full h-auto object-cover rounded"
-              loading="lazy"
-              onError={() => setImgError(prev => ({ ...prev, [img]: true }))}
-            />
-          )
-        })}
-        {images.length === 0 && (
-          <div className="bg-gray-100 h-[400px] flex items-center justify-center">لا يوجد صور</div>
-        )}
+    <header className="sticky top-0 z-50 w-full border-b bg-white">
+      <div className="flex h-16 items-center justify-between px-4 max-w-7xl mx-auto">
+        <Link href="/" className="font-bold text-xl tracking-tight">Nova Moda</Link>
+        <div className="flex gap-6 text-sm">
+          <Link href="/products">المنتجات</Link>
+          <Link href="/cart">السلة</Link>
+        </div>
       </div>
-      <div>
-        <h1 className="text-2xl font-bold">{product?.name}</h1>
-        <p className="text-xl mt-2">{product?.price} {product?.currency || 'JOD'}</p>
-      </div>
-    </div>
+    </header>
   )
 }
+
+export default SiteHeader
