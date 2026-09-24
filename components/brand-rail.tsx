@@ -1,17 +1,50 @@
 "use client";
-import { useEffect, useState } from "react";
 
-// BrandRail مصلح - بدون Date.now() او Math.random() اللي بتعمل React #418
 export function BrandRail() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  
-  // لا ترسم اي شي متغير بين السيرفر والكلاينت
   return (
-    <div className="border-y border-black/10 py-3 overflow-hidden bg-white" suppressHydrationWarning>
-      <div className="flex gap-8 whitespace-nowrap text-[13px] tracking-[0.2em] opacity-60" suppressHydrationWarning>
-        <span>NOVA MODA</span><span>•</span><span>عبايات فاخرة</span><span>•</span><span>NOVA MODA</span><span>•</span><span>عبايات عصرية</span><span>•</span><span>NOVA MODA</span><span>•</span><span>عبايات مصممة بعناية</span><span>•</span><span>NOVA MODA</span>
+    <div className="relative border-y border-black/[0.06] bg-white py-3.5 overflow-hidden">
+      <div className="flex animate-marquee whitespace-nowrap">
+        <div className="flex items-center gap-8 pr-8">
+          <span className="text-[12px] tracking-[0.3em] font-medium text-black/60">NOVA MODA</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.15em] text-black/40">عبايات فاخرة مصممة بعناية</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.3em] font-medium text-black/60">NOVA MODA</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.15em] text-black/40">عبايات عصرية 2025</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.3em] font-medium text-black/60">NOVA MODA</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.15em] text-black/40">فخامة - أناقة - راحة</span>
+          <span className="text-[10px] text-black/20">•</span>
+        </div>
+        {/* Duplicate for seamless loop */}
+        <div className="flex items-center gap-8 pr-8" aria-hidden>
+          <span className="text-[12px] tracking-[0.3em] font-medium text-black/60">NOVA MODA</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.15em] text-black/40">عبايات فاخرة مصممة بعناية</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.3em] font-medium text-black/60">NOVA MODA</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.15em] text-black/40">عبايات عصرية 2025</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.3em] font-medium text-black/60">NOVA MODA</span>
+          <span className="text-[10px] text-black/20">•</span>
+          <span className="text-[12px] tracking-[0.15em] text-black/40">فخامة - أناقة - راحة</span>
+          <span className="text-[10px] text-black/20">•</span>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 35s linear infinite;
+          width: max-content;
+        }
+      `}</style>
     </div>
   );
 }
