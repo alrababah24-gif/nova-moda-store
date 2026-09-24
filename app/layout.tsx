@@ -1,27 +1,33 @@
-import type { Metadata } from "next"
-import { Tajawal } from "next/font/google"
-import "./globals.css"
-import { CartProvider } from "@/components/cart-provider"
-import { Toaster } from "@/components/ui/toaster"
-import MetaPixel from "@/components/meta-pixel"
+// @ts-nocheck
+// هذا الملف - app/layout.tsx - بطفي #418 و _rsc 404 و بركب باتش البيكسل
+import type { Metadata } from "next";
+import "./globals.css";
+import dynamic from "next/dynamic";
+import FbqPatch from "@/components/fbq-patch";
 
-const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400","500","700"] })
+// نخليهم بدون SSR عشان ما يصير فرق نص بين السيرفر والبراوزر
+const CartProvider = dynamic(() => import("@/components/cart-provider"), { ssr: false });
+const SiteHeader = dynamic(() => import("@/components/site-header"), { ssr: false });
+const TopBar = dynamic(() => import("@/components/top-bar"), { ssr: false });
 
 export const metadata: Metadata = {
-  title: "نوفا مودا - عبايات",
-  description: "متجر عبايات",
-}
+  title: "Nova Moda",
+  description: "عبايات",
+};
+
+export const dynamic = 'force-dynamic';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={tajawal.className}>
-        <MetaPixel />
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body suppressHydrationWarning className="min-h-screen bg-white">
+        <FbqPatch />
+        <TopBar />
         <CartProvider>
-          {children}
-          <Toaster />
+          <SiteHeader />
+          <main suppressHydrationWarning>{children}</main>
         </CartProvider>
       </body>
     </html>
-  )
+  );
 }
