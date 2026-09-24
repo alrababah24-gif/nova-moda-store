@@ -1,35 +1,23 @@
 "use client"
 import { useEffect } from "react"
 
-type Props = {
-  id?: string | number
-  name?: string
-  price?: number | string
-  product_id?: string | number
-  productName?: string
-  value?: number
-  currency?: string
-  product?: any
-}
-
-export default function FacebookViewContent(props: Props) {
+export default function FacebookViewContent(props: any) {
   const fire = () => {
     if (typeof window !== "undefined" && (window as any).fbq) {
-      // يدعم الطريقتين: <FacebookViewContent product={product} /> أو <FacebookViewContent id={...} />
       const p = props.product || props
-      const rawId = p.id || p.product_id || props.id || props.product_id || ""
-      const cleanId = String(rawId).trim()
+      const cleanId = String(p.id || p.product_id || "").trim()
       if (!cleanId) return false
 
-      const prodName = p.name || p.productName || p.title || props.name || props.productName || cleanId
-      const priceVal = Number(p.price ?? p.value ?? props.price ?? props.value ?? 0)
+      const prodName = p.name || p.title || cleanId
+      const priceVal = Number(p.price ?? 0)
 
+      // استخدم USD عشان فيسبوك ما يعطي تحذير Invalid currency
       ;(window as any).fbq('track', 'ViewContent', {
         content_ids: [cleanId],
         content_type: 'product',
         content_name: String(prodName),
-        value: priceVal,
-        currency: p.currency || props.currency || 'JOD'
+        value: Number(priceVal.toFixed(2)),
+        currency: 'USD',
       })
       console.log("✅ ViewContent fired:", cleanId, priceVal)
       return true
@@ -45,7 +33,7 @@ export default function FacebookViewContent(props: Props) {
       setTimeout(() => clearInterval(interval), 10000)
       return () => clearInterval(interval)
     }
-  }, [props.id, props.product_id, props.name, props.productName, props.price, props.value, props.product])
+  }, [props.product, props.id])
 
   return null
 }
