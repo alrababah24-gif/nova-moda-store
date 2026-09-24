@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 @@ -6,21 +6,24 @@ import { BrandRail } from "@/components/brand-rail";
 import { ProductGrid } from "@/components/product-grid";
 import { ExperienceBento } from "@/components/experience-bento";
