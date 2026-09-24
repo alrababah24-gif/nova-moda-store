@@ -19,9 +19,6 @@ function mapProduct(row: Record<string, unknown>): Product {
     category_id: row.category_id ? String(row.category_id) : null, category: category ? (category as Category) : null,
     brand_id: row.brand_id ? String(row.brand_id) : null, brand: brand ? (brand as Brand) : null,
     badge: row.badge ? String(row.badge) : null, sizes: Array.isArray(row.sizes) ? row.sizes.map(String) : [],
-    size_stock: row.size_stock && typeof row.size_stock === "object" && !Array.isArray(row.size_stock)
-      ? Object.fromEntries(Object.entries(row.size_stock as Record<string, unknown>).map(([key, value]) => [key, Math.max(0, Number(value ?? 0))]))
-      : {},
     colors: Array.isArray(row.colors) ? row.colors.map(String) : [], images: Array.isArray(row.images) ? row.images.map(String) : [],
     stock: Number(row.stock ?? 0), featured: Boolean(row.featured), active: Boolean(row.active),
     created_at: row.created_at ? String(row.created_at) : undefined, updated_at: row.updated_at ? String(row.updated_at) : undefined,
@@ -78,17 +75,6 @@ export async function getProducts(options?: { featured?: boolean; category?: str
   if (options?.brand) products = products.filter(p => p.brand?.slug === options.brand);
   if (options?.search) { const q = options.search.toLowerCase(); products = products.filter(p => `${p.name} ${p.description} ${p.brand?.name || ""}`.toLowerCase().includes(q)); }
   return products;
-}
-
-
-export async function getProductById(id: string): Promise<Product | null> {
-  if (!id) return null;
-  if (!isSupabaseConfigured()) return fallbackProducts.find(p => p.id === id) ?? null;
-  const supabase = await createClient(); if (!supabase) return fallbackProducts.find(p => p.id === id) ?? null;
-  const { data, error } = await supabase.from("products")
-    .select("*, category:categories(id,name,slug,description,sort_order,active), brand:brands(id,name,slug,tagline,description,logo_url,cover_image,sort_order,active,featured)")
-    .eq("id", id).eq("active", true).maybeSingle();
-  return error || !data ? null : mapProduct(data as Record<string, unknown>);
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

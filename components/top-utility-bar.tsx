@@ -118,6 +118,7 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
       }).format(now),
     [now],
   );
+  const open = isOpenNow(now, settings.open_time, settings.close_time);
   const weatherInfo = weatherMeta(weather?.weatherCode, weather?.isDay);
   const WeatherIcon = weatherInfo.Icon;
 
@@ -131,8 +132,8 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
               <span><b>التوصيل {formatPrice(settings.delivery_price)}</b><small>لكل محافظات الأردن</small></span>
             </div>
             <div className="status-chip">
-              <span className="live-dot is-open" />
-              <span><b>مفتوح 24 ساعة</b><small>خدمة الطلبات على مدار الساعة</small></span>
+              <span className={`live-dot ${open ? "is-open" : "is-closed"}`} />
+              <span><b>{open ? "مفتوح الآن" : "مغلق الآن"}</b><small>{formatBusinessTime(settings.open_time)} — {formatBusinessTime(settings.close_time)}</small></span>
             </div>
             <div className="status-chip">
               <span className="status-icon"><Clock3 size={13} /></span>

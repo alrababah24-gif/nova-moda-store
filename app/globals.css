@@ -73,7 +73,7 @@ html.dark .status-hub{box-shadow:0 14px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(2
 .identity-hero-word{position:absolute;right:-2vw;bottom:-5%;font:900 clamp(130px,23vw,360px)/.72 Arial,sans-serif;letter-spacing:-.09em;color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--brand) 13%,transparent);opacity:.72;user-select:none}
 .hero-copy{position:relative;z-index:3;text-align:right}
 .hero-kicker{display:inline-flex;align-items:center;gap:8px;border:1px solid color-mix(in srgb,var(--brand) 28%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--surface-glass) 92%,transparent);padding:8px 12px;color:var(--brand-strong);font-size:9px;font-weight:900;letter-spacing:.13em;backdrop-filter:blur(16px)}
-.hero-statement{margin-top:18px;max-width:620px;font-size:clamp(30px,3.5vw,46px);font-weight:900;line-height:1.18;letter-spacing:-.03em;text-wrap:balance}
+.hero-statement{margin-top:18px;max-width:760px;font-size:clamp(42px,6.3vw,82px);font-weight:900;line-height:1.11;letter-spacing:-.045em;text-wrap:balance}
 .hero-description{margin-top:22px;max-width:650px;color:var(--muted);font-size:clamp(14px,1.3vw,17px);font-weight:600;line-height:2}
 .hero-actions{margin-top:30px;display:flex;flex-wrap:wrap;align-items:center;gap:9px}.hero-action-primary,.hero-action-secondary,.hero-action-whatsapp{display:inline-flex;min-height:49px;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:11px 20px;font-size:12px;font-weight:900;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease,background .25s}.hero-action-primary{background:var(--ink);color:var(--paper);box-shadow:0 14px 38px color-mix(in srgb,var(--ink) 14%,transparent)}.hero-action-primary:hover{transform:translateY(-3px);box-shadow:0 20px 46px color-mix(in srgb,var(--ink) 20%,transparent)}.hero-action-secondary,.hero-action-whatsapp{border:1px solid var(--line);background:color-mix(in srgb,var(--surface-glass) 90%,transparent);backdrop-filter:blur(15px)}.hero-action-secondary:hover,.hero-action-whatsapp:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--brand) 45%,var(--line));background:var(--surface)}
 .hero-signature-line{margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:11px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.08em}.hero-signature-line i{display:block;height:1px;width:34px;background:linear-gradient(90deg,var(--brand),transparent)}
@@ -88,8 +88,8 @@ html.dark .hero-main-image{box-shadow:0 38px 100px rgba(0,0,0,.36)}html.dark .he
 .proof-card{border:1px solid color-mix(in srgb,var(--line) 82%,transparent);border-radius:23px;background:color-mix(in srgb,var(--surface) 88%,transparent);padding:16px;backdrop-filter:blur(12px);transition:transform .25s ease,border-color .25s ease}.proof-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--brand) 40%,var(--line))}.proof-icon{display:grid;height:38px;width:38px;place-items:center;border-radius:14px;background:var(--brand-soft);color:var(--brand-strong)}.proof-card strong{display:block;margin-top:11px;font-size:12px;font-weight:900}.proof-card p{margin-top:4px;color:var(--muted);font-size:9px;font-weight:700;line-height:1.8}
 
 @media(max-width:1100px){.status-socials{position:sticky;left:0;background:var(--surface-glass);border-radius:14px}.status-chip:nth-child(4){display:none}}
-@media(max-width:767px){.status-hub-shell .container-shell{width:100%;padding-inline:10px}.status-hub{border-radius:18px}.status-chip{padding-inline:8px}.status-chip:nth-child(3),.status-chip:nth-child(4){display:none}.hero-copy{text-align:center}.hero-statement{margin-inline:auto;max-width:560px;font-size:clamp(28px,6vw,34px)}.hero-description{margin-inline:auto}.hero-actions,.hero-signature-line{justify-content:center}.hero-fashion-frame{height:390px;max-width:390px}.hero-main-image{right:11%;width:72%;border-radius:34px 34px 90px 34px}.hero-secondary-image{left:2%;width:34%;border-width:6px}.hero-edition-card{left:0;top:5%;padding:11px}.hero-number-card{right:1%;height:64px;width:64px;border-radius:21px}.hero-orbit-a{height:250px;width:250px}.hero-orbit-b{height:300px;width:300px}.identity-hero-word{bottom:2%;font-size:36vw}.atmosphere-word{opacity:.20}.atmosphere-signature{width:88vw;left:-20vw}.proof-card{padding:14px}}
-@media(max-width:420px){.status-chip:nth-child(5){display:none}.status-socials{padding-right:4px}.hero-fashion-frame{height:350px}.hero-edition-card{display:none}.hero-statement{font-size:28px}.hero-signature-line i{width:18px}}
+@media(max-width:767px){.status-hub-shell .container-shell{width:100%;padding-inline:10px}.status-hub{border-radius:18px}.status-chip{padding-inline:8px}.status-chip:nth-child(3),.status-chip:nth-child(4){display:none}.hero-copy{text-align:center}.hero-statement{margin-inline:auto;font-size:clamp(39px,12vw,62px)}.hero-description{margin-inline:auto}.hero-actions,.hero-signature-line{justify-content:center}.hero-fashion-frame{height:390px;max-width:390px}.hero-main-image{right:11%;width:72%;border-radius:34px 34px 90px 34px}.hero-secondary-image{left:2%;width:34%;border-width:6px}.hero-edition-card{left:0;top:5%;padding:11px}.hero-number-card{right:1%;height:64px;width:64px;border-radius:21px}.hero-orbit-a{height:250px;width:250px}.hero-orbit-b{height:300px;width:300px}.identity-hero-word{bottom:2%;font-size:36vw}.atmosphere-word{opacity:.20}.atmosphere-signature{width:88vw;left:-20vw}.proof-card{padding:14px}}
+@media(max-width:420px){.status-chip:nth-child(5){display:none}.status-socials{padding-right:4px}.hero-fashion-frame{height:350px}.hero-edition-card{display:none}.hero-statement{font-size:39px}.hero-signature-line i{width:18px}}
 
 /* NOVA MODA FINAL — logo fidelity + dark mode system */
 :root{
@@ -166,33 +166,3 @@ html.dark .store-root .bg-white\/90,html.dark .store-root .bg-white\/95{backgrou
 html.dark .store-root .hover\:bg-white:hover{background-color:var(--surface)!important}
 html.dark .store-root .bg-emerald-50{background-color:color-mix(in srgb,var(--success) 10%,var(--surface))!important}
 html.dark .store-root .text-emerald-700,html.dark .store-root .text-emerald-800{color:var(--success)!important}
-
-/* Hero image slider controls — frame-level so arrows stay visible. */
-.hero-slider-controls{position:absolute;left:0;right:0;top:42%;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 4px;pointer-events:none;transform:translateY(-50%)}
-.hero-slider-arrow{pointer-events:auto;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border:1px solid color-mix(in srgb,var(--brand) 38%,rgba(255,255,255,.7));border-radius:999px;background:rgba(255,255,255,.94);color:#3D2B24;backdrop-filter:blur(14px);box-shadow:0 12px 32px rgba(31,24,20,.18);transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
-.hero-slider-arrow:hover{transform:scale(1.08);background:#fff;box-shadow:0 16px 38px rgba(31,24,20,.22)}
-.hero-slider-arrow:active{transform:scale(.95)}
-html.dark .hero-slider-arrow{border-color:rgba(255,255,255,.18);background:rgba(17,20,26,.92);color:#F4F5F7;box-shadow:0 12px 34px rgba(0,0,0,.42)}
-html.dark .hero-slider-arrow:hover{background:#20242A}
-@media(max-width:767px){.hero-slider-controls{top:41%;padding:0 1px}.hero-slider-arrow{width:42px;height:42px}}
-
-/* NOVA MODA — FINAL HERO TITLE SIZE LOCK */
-.hero-statement{
-  max-width:620px !important;
-  font-size:clamp(30px,3.5vw,46px) !important;
-  line-height:1.18 !important;
-  letter-spacing:-.03em !important;
-}
-
-@media(max-width:767px){
-  .hero-statement{
-    max-width:560px !important;
-    font-size:clamp(28px,6vw,34px) !important;
-  }
-}
-
-@media(max-width:420px){
-  .hero-statement{
-    font-size:28px !important;
-  }
-}

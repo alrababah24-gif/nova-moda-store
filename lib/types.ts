@@ -18,7 +18,6 @@ export type StoreSettings = {
   hero_description: string;
   hero_primary_cta: string;
   hero_secondary_cta: string;
-  hero_product_id?: string | null;
   logo_url?: string | null;
   updated_at?: string;
 };
@@ -58,7 +57,6 @@ export type Product = {
   brand?: Brand | null;
   badge?: string | null;
   sizes: string[];
-  size_stock: Record<string, number>;
   colors: string[];
   images: string[];
   stock: number;
@@ -94,7 +92,6 @@ export type CartItem = {
   size: string;
   color?: string;
   qty: number;
-  maxStock?: number;
 };
 
 export type Order = {

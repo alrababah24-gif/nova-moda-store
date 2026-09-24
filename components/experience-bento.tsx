@@ -1,38 +1,6 @@
 "use client";
+import Link from "next/link";
+import { ArrowUpLeft, CircleUserRound, Search, Sparkles, Truck, WandSparkles } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 
-export function ExperienceBento() {
-  return (
-    <div className="py-16 md:py-20 bg-[#fafaf8] border-t border-black/[0.06]">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4">
-          {/* Card 1 */}
-          <div className="group bg-white border border-black/[0.06] rounded-[20px] p-6 md:p-7 hover:shadow-[0_10px_40px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-300">
-            <div className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center mb-5 text-[18px]">↗</div>
-            <h3 className="font-bold text-[15px] mb-2">شحن مجاني</h3>
-            <p className="text-[13px] text-black/50 leading-relaxed">توصيل مجاني لجميع الطلبات داخل الأردن خلال 24-48 ساعة</p>
-          </div>
-
-          {/* Card 2 */}
-          <div className="group bg-white border border-black/[0.06] rounded-[20px] p-6 md:p-7 hover:shadow-[0_10px_40px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-300">
-            <div className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center mb-5 text-[16px]">✓</div>
-            <h3 className="font-bold text-[15px] mb-2">دفع آمن 100%</h3>
-            <p className="text-[13px] text-black/50 leading-relaxed">وسائل دفع متعددة ومحمية - كاش عند الاستلام أو دفع إلكتروني</p>
-          </div>
-
-          {/* Card 3 */}
-          <div className="group bg-white border border-black/[0.06] rounded-[20px] p-6 md:p-7 hover:shadow-[0_10px_40px_rgba(0,0,0,0.06)] hover:border-black/[0.08] transition-all duration-300">
-            <div className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center mb-5 text-[16px]">↺</div>
-            <h3 className="font-bold text-[15px] mb-2">استرجاع سهل</h3>
-            <p className="text-[13px] text-black/50 leading-relaxed">استرجاع مجاني خلال 14 يوم - رضاكم يهمنا وضمان جودة المنتج</p>
-          </div>
-        </div>
-
-        {/* Bottom trust */}
-        <div className="mt-12 text-center">
-          <p className="text-[11px] tracking-[0.2em] text-black/30">NOVA MODA • DESIGNED WITH CARE IN AMMAN</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-export default ExperienceBento;
+export function ExperienceBento(){const reduce=useReducedMotion();return <section className="py-6 pb-16 sm:pb-20"><div className="container-shell"><div className="mb-7"><p className="text-[10px] font-extrabold tracking-[.22em] text-[var(--brand-strong)]">NOVA EXPERIENCE</p><h2 className="mt-2 text-[30px] font-extrabold sm:text-[42px]">تسوّق أذكى، بشكل أهدأ.</h2><p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--muted)]">صممنا التجربة حتى توصلي للقطعة، المقاس وحالة الطلب بأقل خطوات ممكنة.</p></div><div className="grid gap-4 lg:grid-cols-[1.15fr_.85fr]"><motion.div initial={reduce?false:{opacity:0,y:22}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.2}} className="future-card future-card-main"><div className="future-orb"/><div className="relative z-10 flex h-full flex-col justify-between"><div className="flex items-center justify-between"><span className="future-icon"><Search size={20}/></span><span className="text-[9px] font-extrabold tracking-[.18em] text-[var(--muted)]">SMART DISCOVERY</span></div><div><h3 className="max-w-lg text-[30px] font-extrabold leading-[1.35] sm:text-[38px]">ابحثي باسم الموديل، البراند أو الستايل.</h3><p className="mt-3 max-w-lg text-sm leading-7 text-[var(--muted)]">البحث السريع موجود بكل الموقع، والنتائج توصلك للمنتج مباشرة بدون لف طويل.</p><Link href="/search" className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold">جربي البحث <ArrowUpLeft size={14}/></Link></div></div></motion.div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1"><motion.div initial={reduce?false:{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} className="future-card"><div className="flex items-start justify-between"><span className="future-icon"><CircleUserRound size={19}/></span><Sparkles size={15} className="text-[var(--brand-strong)]"/></div><h3 className="mt-10 text-2xl font-extrabold">حسابك يتذكرك</h3><p className="mt-2 text-xs leading-6 text-[var(--muted)]">اسمك، بياناتك وطلباتك بمكان واحد.</p><Link href="/account" className="mt-5 inline-flex items-center gap-2 text-[11px] font-extrabold">افتحي حسابك <ArrowUpLeft size={13}/></Link></motion.div><motion.div initial={reduce?false:{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:.06}} className="future-card future-card-dark"><div className="flex items-start justify-between"><span className="future-icon"><Truck size={19}/></span><WandSparkles size={16}/></div><h3 className="mt-10 text-2xl font-extrabold">تتبّع بصري واضح</h3><p className="mt-2 text-xs leading-6 opacity-70">جديد ← تجهيز ← شحن ← توصيل، بدون تخمين.</p><Link href="/account/orders" className="mt-5 inline-flex items-center gap-2 text-[11px] font-extrabold">متابعة الطلبات <ArrowUpLeft size={13}/></Link></motion.div></div></div></div></section>}
