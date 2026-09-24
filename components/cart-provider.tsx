@@ -1,159 +1,93 @@
 // @ts-nocheck
 "use client"
-import { createContext, useContext, useEffect, useState, useMemo } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
-type CartItem = {
-  id: string
-  name?: string
-  price?: number
-  images?: string[]
-  image?: string
-  size?: string
-  selectedSize?: string
-  qty?: number
-  quantity?: number
-  [key: string]: any
-}
-
-type CartContextValue = {
-  items: CartItem[]
-  cartItems: CartItem[]
-  count: number
-  total: number
-  subtotal: number // alias للتوافق مع checkout-form
-  totalPrice: number // alias
-  open: boolean // alias للتوافق مع site-header
-  isOpen: boolean
-  setIsOpen: (v: boolean) => void
-  setOpen: (v: boolean) => void
-  addToCart: (product: any, size?: string, qty?: number) => void
-  addItem: (product: any, qty?: number) => void
-  add: (product: any, qty?: number) => void
-  removeFromCart: (id: string, size?: string) => void
-  removeItem: (id: string, size?: string) => void
-  updateQty: (id: string, qty: number, size?: string) => void
-  clearCart: () => void
-  [key: string]: any
-}
-
-const CartContext = createContext<CartContextValue | null>(null)
+const CartContext = createContext<any>(null)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([])
+  const [items, setItems] = useState<any[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
+  // مهم جدا لحل React #418 - لا تقرأ localStorage إلا بعد ما يصير mounted
   useEffect(() => {
+    setMounted(true)
     try {
-      const raw = localStorage.getItem("nova-cart")
-      if (raw) {
-        const parsed = JSON.parse(raw)
+      const saved = localStorage.getItem("cart")
+      if (saved) {
+        const parsed = JSON.parse(saved)
         if (Array.isArray(parsed)) setItems(parsed)
       }
     } catch {}
-    setMounted(true)
   }, [])
 
   useEffect(() => {
     if (!mounted) return
     try {
-      localStorage.setItem("nova-cart", JSON.stringify(items))
+      localStorage.setItem("cart", JSON.stringify(items))
     } catch {}
   }, [items, mounted])
 
-  const addToCart = (product: any, size?: string, qty: number = 1) => {
-    const cleanId = String(product.id || product.product_id || "")
-    const selSize = size || product.selectedSize || product.size || ""
+  const addToCart = (product: any, size?: string, qty = 1) => {
     setItems((prev) => {
-      const idx = prev.findIndex(
-        (it) => String(it.id) === cleanId && (it.selectedSize || it.size || "") === selSize
-      )
-      if (idx > -1) {
-        const next = [...prev]
-        const curQty = next[idx].qty || next[idx].quantity || 1
-        next[idx] = { ...next[idx], qty: curQty + qty, quantity: curQty + qty }
-        return next
+      const id = String(product.id || product.product_id)
+      const existingIdx = prev.findIndex((p) => String(p.id) === id && (p.selectedSize || p.size) === size)
+      if (existingIdx >= 0) {
+        const copy = [...prev]
+        copy[existingIdx] = { ...copy[existingIdx], qty: (copy[existingIdx].qty || 1) + qty }
+        return copy
       }
-      return [
-        ...prev,
-        {
-          ...product,
-          id: cleanId,
-          selectedSize: selSize,
-          size: selSize,
-          qty,
-          quantity: qty,
-        },
-      ]
+      return [...prev, { ...product, id, qty, selectedSize: size, size }]
     })
     setIsOpen(true)
   }
 
   const removeFromCart = (id: string, size?: string) => {
-    setItems((prev) =>
-      prev.filter((it) => {
-        if (String(it.id) !== String(id)) return true
-        if (size && (it.selectedSize || it.size) !== size) return true
-        if (!size) return false
-        return false
-      })
-    )
+    setItems((prev) => prev.filter((p) => !(String(p.id) === String(id) && (size ? (p.selectedSize || p.size) === size : true))))
   }
 
   const updateQty = (id: string, qty: number, size?: string) => {
-    if (qty < 1) {
-      removeFromCart(id, size)
-      return
-    }
-    setItems((prev) =>
-      prev.map((it) => {
-        if (String(it.id) !== String(id)) return it
-        if (size && (it.selectedSize || it.size || "") !== size) return it
-        return { ...it, qty, quantity: qty }
-      })
-    )
+    if (qty <= 0) return removeFromCart(id, size)
+    setItems((prev) => prev.map((p) => (String(p.id) === String(id) && (size ? (p.selectedSize || p.size) === size : true) ? { ...p, qty } : p)))
   }
 
   const clearCart = () => setItems([])
 
-  const { count, total } = useMemo(() => {
-    let c = 0
-    let t = 0
-    for (const it of items) {
-      const q = it.qty || it.quantity || 1
-      const p = Number(it.price || 0)
-      c += q
-      t += p * q
-    }
-    return { count: c, total: t }
-  }, [items])
+  const total = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 1), 0)
+  const count = items.reduce((s, it) => s + (Number(it.qty) || 1), 0)
 
+  // توافق مع كل الأسماء القديمة عشان ما يفشل البناء
   const value: any = {
     items,
-    cartItems: items,
-    count,
-    total,
-    subtotal: total, // نفس total بس باسم قديم عشان checkout-form
-    totalPrice: total,
-    cartTotal: total,
-    open: isOpen, // نفس isOpen بس باسم قديم عشان site-header
-    isOpen,
-    setIsOpen,
-    setOpen: setIsOpen,
+    cart: items,
     addToCart,
-    addItem: (p: any, q = 1) => addToCart(p, p?.selectedSize || p?.size, q),
-    add: (p: any, q = 1) => addToCart(p, p?.selectedSize || p?.size, q),
+    addItem: addToCart,
+    add: addToCart,
     removeFromCart,
     removeItem: removeFromCart,
+    remove: removeFromCart,
     updateQty,
+    updateQuantity: updateQty,
+    total,
+    subtotal: total,
+    count,
+    cartCount: count,
+    isOpen,
+    open: isOpen,
+    isCartOpen: isOpen,
+    setIsOpen,
+    setOpen: setIsOpen,
+    openCart: () => setIsOpen(true),
+    closeCart: () => setIsOpen(false),
     clearCart,
+    mounted,
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 
-export function useCart() {
+export const useCart = () => {
   const ctx = useContext(CartContext)
-  if (!ctx) throw new Error("useCart must be used within CartProvider")
+  if (!ctx) throw new Error("useCart must be used inside CartProvider")
   return ctx
 }
