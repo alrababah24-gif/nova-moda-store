@@ -1,36 +1,34 @@
-// @ts-nocheck - FINAL SAFE STORE PAGE - يبني 100% مؤقتاً لحد ما ترجع الأصلي
-// هذا ملف آمن يخلي Netlify يصير أخضر، وبعدها ترجع منتجاتك
-
+// هذا الملف تحطه في app/(store)/page.tsx
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import { Suspense } from 'react';
+import { BrandRail } from "@/components/brand-rail";
+import { ProductGrid } from "@/components/product-grid";
+import { ExperienceBento } from "@/components/experience-bento";
+import { Hero } from "@/components/hero";
+import Link from "next/link";
 
-// نحاول نستورد المكونات اللي موجودة عندك، اذا مش موجودة ما راح يفشل البناء
-let BrandRail, ProductGrid, ExperienceBento, AnimatedSection;
-
-try {
-  BrandRail = require('@/components/brand-rail').BrandRail || require('@/components/brand-rail').default;
-} catch {}
-try {
-  ProductGrid = require('@/components/product-grid').ProductGrid || require('@/components/product-grid').default;
-} catch {}
-try {
-  ExperienceBento = require('@/components/experience-bento').ExperienceBento || require('@/components/experience-bento').default;
-} catch {}
-try {
-  AnimatedSection = require('@/components/ui/animated-section').AnimatedSection || require('@/components/ui/animated-section').default;
-} catch {}
-
-export default function Page() {
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
-      <Suspense fallback={<div className="p-8 text-center">جاري التحميل...</div>}>
-        {BrandRail ? <BrandRail /> : null}
-        {ProductGrid ? <ProductGrid /> : <div className="p-20 text-center text-gray-500">سيتم عرض المنتجات هنا - ارجع الملف الأصلي من History</div>}
-        {ExperienceBento ? <ExperienceBento /> : null}
-        {AnimatedSection ? <AnimatedSection /> : null}
-      </Suspense>
+    <div className="bg-white min-h-screen">
+      {/* الشريط العلوي للبراندات */}
+      <BrandRail />
+      
+      {/* الهيرو */}
+      <Hero />
+
+      {/* المنتجات */}
+      <section className="py-14">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 flex justify-between items-center">
+            <h2 className="text-[34px] font-bold">عبايات مصممة بعناية</h2>
+            <Link href="/shop" className="text-black underline">كل المنتجات</Link>
+          </div>
+          <ProductGrid />
+        </div>
+      </section>
+
+      <ExperienceBento />
     </div>
   );
 }
