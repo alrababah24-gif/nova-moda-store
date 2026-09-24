@@ -1,18 +1,46 @@
-// @ts-nocheck
-export async function GET() {
-  // نسخة ثابتة مضمونة - بتشتغل حتى لو lib/data فيه مشكلة
-  // بعد ما يصير Published بدك، بنرجع للنسخة الديناميكية
+import { getProducts } from "@/lib/data";
 
-  const csv = `id,title,description,availability,condition,price,link,image_link,brand
-Abaya-125,عباية موديل 125,عباية انيقة فاخرة,in stock,new,24 JOD,https://novamodaabaya.com/product/Abaya-125,https://novamodaabaya.com/placeholder.jpg,Nova Moda
-Abaya-124,عباية موديل 124,عباية كلاسيك,in stock,new,28 JOD,https://novamodaabaya.com/product/Abaya-124,https://novamodaabaya.com/placeholder.jpg,Nova Moda
-Abaya-123,عباية موديل 123,عباية عصرية,in stock,new,22 JOD,https://novamodaabaya.com/product/Abaya-123,https://novamodaabaya.com/placeholder.jpg,Nova Moda
-`.trim()
+export const dynamic = "force-dynamic";
 
-  return new Response(csv, {
+const COLUMNS = ["id", "title", "description", "availability", "condition", "price", "link", "image_link", "additional_image_link", "brand"];
+
+function csvCell(value: string) {
+  return `"${value.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+}
+
+function absoluteUrl(path: string, siteUrl: string) {
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${siteUrl}${path.startsWith("/") ? "" : "/"}${path}`;
+}
+
+// Meta Commerce Manager product feed. The `id` column must equal the
+// content_ids sent by the pixel (ViewContent / AddToCart / Purchase).
+export async function GET(request: Request) {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin).replace(/\/$/, "");
+  const products = await getProducts();
+
+  const rows = products
+    .filter((product) => product.images?.length)
+    .map((product) => {
+      const [image, ...extraImages] = product.images.map((src) => absoluteUrl(src, siteUrl));
+      return [
+        product.id,
+        product.name,
+        product.description || product.name,
+        product.stock > 0 ? "in stock" : "out of stock",
+        "new",
+        `${Number(product.price).toFixed(2)} JOD`,
+        `${siteUrl}/product/${product.slug}`,
+        image,
+        extraImages.slice(0, 10).join(","),
+        product.brand?.name || "Nova Moda",
+      ].map((cell) => csvCell(String(cell ?? ""))).join(",");
+    });
+
+  return new Response([COLUMNS.join(","), ...rows].join("\n"), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Cache-Control": "s-maxage=3600"
-    }
-  })
+      "Cache-Control": "public, max-age=0, s-maxage=900",
+    },
+  });
 }

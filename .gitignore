@@ -6,8 +6,9 @@ out
 *.log
 .DS_Store
 *.tsbuildinfo
-
-# Local migration safety backups
-migration-backups/
-.env.local.txt 
-.netlify/ 
+.env.local
+.netlify/
+.next/
+node_modules/
+.env.local
+.env.local.txt

@@ -7,11 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "media:migrate:dry": "node scripts/migrate-supabase-media-to-imagekit.mjs --dry-run",
-    "media:migrate": "node scripts/migrate-supabase-media-to-imagekit.mjs",
-    "media:cleanup:supabase": "node scripts/cleanup-migrated-supabase-storage.mjs",
-    "media:rollback": "node scripts/rollback-imagekit-migration.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

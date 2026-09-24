@@ -1,13 +1,13 @@
-// @ts-nochek
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, MessageCircle, ShieldCheck, Truck } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { useAccount } from "@/components/account/account-provider";
 import type { StoreSettings } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
+import { trackPixel } from "@/lib/meta-pixel";
 
 export function CheckoutForm({ settings, databaseReady }: { settings: StoreSettings; databaseReady: boolean }) {
   const cart = useCart();
@@ -15,6 +15,19 @@ export function CheckoutForm({ settings, databaseReady }: { settings: StoreSetti
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const checkoutTracked = useRef(false);
+
+  // The cart hydrates from localStorage after mount, so wait for items before tracking.
+  useEffect(() => {
+    if (checkoutTracked.current || !cart.items.length) return;
+    checkoutTracked.current = true;
+    trackPixel("InitiateCheckout", {
+      content_ids: cart.items.map((item) => item.productId),
+      content_type: "product",
+      num_items: cart.count,
+      valueJOD: cart.subtotal,
+    });
+  }, [cart.items, cart.count, cart.subtotal]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -66,6 +79,14 @@ export function CheckoutForm({ settings, databaseReady }: { settings: StoreSetti
       const response = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "تعذر إنشاء الطلب");
+      trackPixel("Purchase", {
+        content_ids: cart.items.map((item) => item.productId),
+        contents: cart.items.map((item) => ({ id: item.productId, quantity: item.qty })),
+        content_type: "product",
+        num_items: cart.count,
+        order_id: data.orderNumber,
+        valueJOD: total,
+      }, `purchase-${data.orderNumber}`);
       window.open(`https://wa.me/${data.whatsapp}?text=${encodeURIComponent(data.whatsappMessage)}`, "_blank", "noopener,noreferrer");
       cart.clear();
       router.push(`/order-success?order=${encodeURIComponent(data.orderNumber)}`);
