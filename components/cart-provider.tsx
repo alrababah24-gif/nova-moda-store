@@ -20,6 +20,12 @@ type CartContextValue = {
   cartItems: CartItem[]
   count: number
   total: number
+  subtotal: number // alias للتوافق مع checkout-form
+  totalPrice: number // alias
+  open: boolean // alias للتوافق مع site-header
+  isOpen: boolean
+  setIsOpen: (v: boolean) => void
+  setOpen: (v: boolean) => void
   addToCart: (product: any, size?: string, qty?: number) => void
   addItem: (product: any, qty?: number) => void
   add: (product: any, qty?: number) => void
@@ -27,8 +33,7 @@ type CartContextValue = {
   removeItem: (id: string, size?: string) => void
   updateQty: (id: string, qty: number, size?: string) => void
   clearCart: () => void
-  isOpen: boolean
-  setIsOpen: (v: boolean) => void
+  [key: string]: any
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -38,7 +43,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // حل مشكلة React #418 : لا تقرأ من localStorage إلا بعد ما يصير mounted
   useEffect(() => {
     try {
       const raw = localStorage.getItem("nova-cart")
@@ -124,11 +128,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return { count: c, total: t }
   }, [items])
 
-  const value: CartContextValue = {
+  const value: any = {
     items,
     cartItems: items,
     count,
     total,
+    subtotal: total, // نفس total بس باسم قديم عشان checkout-form
+    totalPrice: total,
+    cartTotal: total,
+    open: isOpen, // نفس isOpen بس باسم قديم عشان site-header
+    isOpen,
+    setIsOpen,
+    setOpen: setIsOpen,
     addToCart,
     addItem: (p: any, q = 1) => addToCart(p, p?.selectedSize || p?.size, q),
     add: (p: any, q = 1) => addToCart(p, p?.selectedSize || p?.size, q),
@@ -136,8 +147,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     removeItem: removeFromCart,
     updateQty,
     clearCart,
-    isOpen,
-    setIsOpen,
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
