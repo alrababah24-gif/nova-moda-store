@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import FacebookViewContent from "@/components/facebook-viewcontent"
 import { useCart } from "@/components/cart-provider"
+import { imageKitUrl } from "@/lib/utils"
 
 export function ProductDetailClient({ product, settings }: any) {
   const [qty, setQty] = useState(1)
@@ -49,7 +50,7 @@ export function ProductDetailClient({ product, settings }: any) {
           <div className="relative aspect-[4/5] rounded-[20px] overflow-hidden bg-[#f6f6f6]">
             {mounted && (
               <Image
-                src={images[activeImg]}
+                src={imageKitUrl(images[activeImg], 1600)}
                 alt={product?.name || "product"}
                 fill
                 className="object-cover"
@@ -62,14 +63,14 @@ export function ProductDetailClient({ product, settings }: any) {
             <div className="flex gap-2 mt-3 overflow-auto">
               {images.map((img: string, i: number) => (
                 <button key={i} onClick={() => setActiveImg(i)} className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 ${activeImg===i ? "border-black":"border-transparent"}`}>
-                  <Image src={img} alt="" fill className="object-cover" unoptimized />
+                  <Image src={imageKitUrl(img, 200)} alt="" fill className="object-cover" unoptimized />
                 </button>
               ))}
             </div>
           )}
         </div>
         <div className="px-1">
-          <Link href="/products" className="text-sm text-gray-500">← العودة للمنتجات</Link>
+          <Link href="/shop" className="text-sm text-gray-500">← العودة للمنتجات</Link>
           <h1 className="text-[22px] font-bold mt-3">{product?.name}</h1>
           <div className="mt-3 flex gap-3">
             <span className="text-xl font-bold">{price} JOD</span>

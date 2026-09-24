@@ -27,3 +27,9 @@ export function getSizeStock(product: { size_stock?: Record<string, number>; siz
   if ((product.sizes?.length || 0) === 1) return Math.max(0, Math.floor(Number(product.stock || 0)));
   return 0;
 }
+
+// Some large originals on ImageKit return 400 when requested untransformed, so always ask for a resized copy.
+export function imageKitUrl(src: string, width = 1600) {
+  if (!src || !src.includes("ik.imagekit.io") || /[?&]tr=/.test(src)) return src;
+  return `${src}${src.includes("?") ? "&" : "?"}tr=w-${width}`;
+}
