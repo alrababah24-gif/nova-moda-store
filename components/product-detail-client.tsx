@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import FacebookViewContent from "@/components/facebook-viewcontent"
 import { useCart } from "@/components/cart-provider"
@@ -11,12 +11,11 @@ export function ProductDetailClient({ product, settings }: any) {
   const cart: any = useCart()
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [activeImg, setActiveImg] = useState(0)
-
-  // امنع hydration mismatch - الصور بس بعد ما يتحمل المتصفح
   const [mounted, setMounted] = useState(false)
-  useState(() => { setMounted(true) } as any)
-  // useEffect الحقيقي
-  import("react").then(({ useEffect }) => {})
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const images = product?.images?.length ? product.images : ["/placeholder.svg"]
   const sizes: string[] = product?.sizes || []
