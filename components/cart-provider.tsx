@@ -1,55 +1,103 @@
-// @ts-nocheck
-// FINAL FIX - بيطفي #418 نهائيا
-"use client"
-import { createContext, useContext, useEffect, useState, useMemo } from "react"
+"use client";
 
-const CartContext = createContext<any>({
-  items: [], cartItems: [], count: 0, total: 0, subtotal: 0, mounted: false,
-  addToCart: () => {}, removeFromCart: () => {}, updateQty: () => {}, clearCart: () => {},
-  isOpen: false, open: false, setIsOpen: () => {},
-})
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { CartItem, Product } from "@/lib/types";
+import { getSizeStock } from "@/lib/utils";
+import { trackProductEvent } from "@/lib/meta-pixel";
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<any[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
+type CartContextValue = {
+  items: CartItem[];
+  count: number;
+  subtotal: number;
+  isOpen: boolean;
+  addItem: (product: Product, size: string, color?: string, qty?: number) => void;
+  updateQty: (productId: string, size: string, color: string | undefined, qty: number) => void;
+  removeItem: (productId: string, size: string, color?: string) => void;
+  clear: () => void;
+  open: () => void;
+  close: () => void;
+};
+
+const CartContext = createContext<CartContextValue | null>(null);
+const STORAGE_KEY = "nova_moda_cart_v2";
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
     try {
-      const raw = localStorage.getItem("nova-cart")
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed)) setItems(parsed)
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) setItems(JSON.parse(stored));
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items, hydrated]);
+
+  const addItem = useCallback((product: Product, size: string, color?: string, qty = 1) => {
+    const maxStock = Math.max(0, getSizeStock(product, size));
+    if (maxStock <= 0) return;
+    setItems((current) => {
+      const index = current.findIndex((item) => item.productId === product.id && item.size === size && item.color === color);
+      if (index >= 0) {
+        return current.map((item, i) => i === index
+          ? { ...item, maxStock, qty: Math.min(item.qty + qty, maxStock, 10) }
+          : item);
       }
-    } catch {}
-  }, [])
+      return [...current, {
+        productId: product.id,
+        name: product.name,
+        slug: product.slug,
+        image: product.images[0] || "/products/abaya-classic-beige.svg",
+        price: product.price,
+        size,
+        color,
+        qty: Math.min(qty, maxStock, 10),
+        maxStock,
+      }];
+    });
+    setIsOpen(true);
+    trackProductEvent("AddToCart", product, Math.min(qty, maxStock, 10));
+  }, []);
 
-  useEffect(() => {
-    if (!mounted) return
-    try { localStorage.setItem("nova-cart", JSON.stringify(items)) } catch {}
-  }, [items, mounted])
+  const updateQty = useCallback((productId: string, size: string, color: string | undefined, qty: number) => {
+    if (qty <= 0) {
+      setItems((current) => current.filter((item) => !(item.productId === productId && item.size === size && item.color === color)));
+      return;
+    }
+    setItems((current) => current.map((item) => {
+      if (!(item.productId === productId && item.size === size && item.color === color)) return item;
+      const limit = Math.max(1, Math.min(item.maxStock ?? 10, 10));
+      return { ...item, qty: Math.min(qty, limit) };
+    }));
+  }, []);
 
-  const count = useMemo(() => mounted ? items.reduce((s, it) => s + (it.qty || it.quantity || 1), 0) : 0, [items, mounted])
-  const total = useMemo(() => mounted ? items.reduce((s, it) => s + Number(it.price || 0) * (it.qty || it.quantity || 1), 0) : 0, [items, mounted])
+  const removeItem = useCallback((productId: string, size: string, color?: string) => {
+    setItems((current) => current.filter((item) => !(item.productId === productId && item.size === size && item.color === color)));
+  }, []);
 
-  const addToCart = (product: any, size?: string, qty = 1) => {
-    setItems(prev => {
-      const key = `${product.id}-${size || 'default'}`
-      const exist = prev.find(it => `${it.id}-${it.selectedSize || 'default'}` === key)
-      if (exist) return prev.map(it => `${it.id}-${it.selectedSize || 'default'}` === key ? {...it, qty: (it.qty||1)+qty, quantity: (it.quantity||1)+qty} : it)
-      return [...prev, {...product, selectedSize: size, qty, quantity: qty}]
-    })
-    setIsOpen(true)
-    try {
-      // @ts-ignore نبعث USD للبيكسل عشان ما يطلع Invalid currency، السعر نفسه
-      if (typeof window !== 'undefined' && window.fbq) window.fbq('track','AddToCart',{content_ids:[String(product.id)],content_type:'product',value:Number(Number(product.price*qty).toFixed(2)),currency:'USD'})
-    } catch {}
-  }
+  const value = useMemo<CartContextValue>(() => ({
+    items,
+    count: items.reduce((sum, item) => sum + item.qty, 0),
+    subtotal: items.reduce((sum, item) => sum + item.price * item.qty, 0),
+    isOpen,
+    addItem,
+    updateQty,
+    removeItem,
+    clear: () => setItems([]),
+    open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
+  }), [items, isOpen, addItem, updateQty, removeItem]);
 
-  const value = { items, cartItems: items, count, total, subtotal: total, totalPrice: total, mounted, isOpen, open: isOpen, setIsOpen, setOpen: setIsOpen, addToCart, removeFromCart: (id:string)=>setItems(p=>p.filter(it=>String(it.id)!==String(id))), updateQty: (id:string,q:number)=>setItems(p=>p.map(it=>String(it.id)===String(id)?{...it,qty:q,quantity:q}:it)), clearCart: ()=>setItems([]) }
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
-export function useCart(){ return useContext(CartContext) }
-export default CartProvider
+export function useCart() {
+  const context = useContext(CartContext);
+  if (!context) throw new Error("useCart must be used inside CartProvider");
+  return context;
+}
