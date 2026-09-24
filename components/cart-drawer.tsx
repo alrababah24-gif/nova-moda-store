@@ -2,14 +2,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
-import { formatPrice } from "@/lib/utils";
+import { deliverableImageUrl, formatPrice } from "@/lib/utils";
 
 export function CartDrawer() {
   const cart = useCart();
   const reduce = useReducedMotion();
+  const { isOpen, close } = cart;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, close]);
+
   return (
     <AnimatePresence>
       {cart.isOpen && (
@@ -32,7 +42,7 @@ export function CartDrawer() {
                 <div className="space-y-3">
                   {cart.items.map((item) => (
                     <div key={`${item.productId}-${item.size}-${item.color ?? ""}`} className="flex gap-3 rounded-2xl border border-[#F0E6DC] bg-white p-3">
-                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[#FDF6F0]"><Image src={item.image} alt={item.name} fill sizes="80px" className="object-contain p-1" /></div>
+                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[#FDF6F0]"><Image src={deliverableImageUrl(item.image)} alt={item.name} fill sizes="80px" className="object-contain p-1" /></div>
                       <div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-bold leading-6">{item.name}</p><p className="mt-1 text-xs text-[#8C7A72]">المقاس: {item.size}{item.color ? ` • ${item.color}` : ""}{typeof item.maxStock === "number" ? ` • المتوفر ${item.maxStock}` : ""}</p><div className="mt-3 flex items-center justify-between gap-2"><strong className="text-sm">{formatPrice(item.price * item.qty)}</strong><div className="flex items-center gap-1"><button className="grid h-7 w-7 place-items-center rounded-full border border-[#F0E6DC]" onClick={() => cart.updateQty(item.productId,item.size,item.color,item.qty-1)}><Minus size={12}/></button><span className="w-6 text-center text-xs font-bold">{item.qty}</span><button disabled={typeof item.maxStock === "number" && item.qty >= Math.min(item.maxStock,10)} className="grid h-7 w-7 place-items-center rounded-full border border-[#F0E6DC] disabled:cursor-not-allowed disabled:opacity-30" onClick={() => cart.updateQty(item.productId,item.size,item.color,item.qty+1)}><Plus size={12}/></button><button className="mr-1 grid h-7 w-7 place-items-center rounded-full text-red-500" onClick={() => cart.removeItem(item.productId,item.size,item.color)} aria-label="حذف"><Trash2 size={13}/></button></div></div></div>
                     </div>
                   ))}

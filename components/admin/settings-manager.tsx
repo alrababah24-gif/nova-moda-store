@@ -7,6 +7,7 @@ import { ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/imagekit-upload-client";
 import type { Product, StoreSettings } from "@/lib/types";
+import { deliverableImageUrl } from "@/lib/utils";
 
 export function SettingsManager({ settings, products }: { settings: StoreSettings; products: Product[] }) {
   const router = useRouter();
@@ -97,7 +98,7 @@ export function SettingsManager({ settings, products }: { settings: StoreSetting
 
         {selectedHeroProduct && <div className="md:col-span-2 flex items-center gap-4 rounded-2xl border border-[#EEE1D7] bg-[#FFFCF9] p-3">
           <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-[#FDF6F0]">
-            <Image src={selectedHeroProduct.images[0] || "/products/abaya-classic-beige.svg"} alt={selectedHeroProduct.name} fill className="object-contain p-1" sizes="96px"/>
+            <Image src={deliverableImageUrl(selectedHeroProduct.images[0]) || "/products/abaya-classic-beige.svg"} alt={selectedHeroProduct.name} fill className="object-contain p-1" sizes="96px"/>
           </div>
           <div><p className="text-[10px] font-extrabold text-[#A27E6C]">الموديل المختار للواجهة</p><strong className="mt-1 block text-sm">{selectedHeroProduct.name}</strong><p className="mt-2 text-[10px] text-[#8C7A72]">صور هذا الموديل فقط هي التي ستظهر في مساحة الصور الكبيرة أعلى الصفحة.</p></div>
         </div>}
