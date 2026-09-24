@@ -27,3 +27,21 @@ export function getSizeStock(product: { size_stock?: Record<string, number>; siz
   if ((product.sizes?.length || 0) === 1) return Math.max(0, Math.floor(Number(product.stock || 0)));
   return 0;
 }
+
+const IMAGEKIT_HOST = "ik.imagekit.io";
+const IMAGEKIT_MAX_WIDTH = 2000;
+
+// ImageKit rejects originals above 25 megapixels (HTTP 400 "ELIMIT"), so ask for a resized
+// rendition instead. Non-ImageKit URLs and URLs that already carry a transformation pass through.
+export function deliverableImageUrl(url: string) {
+  if (!url) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== IMAGEKIT_HOST) return url;
+    if (parsed.searchParams.has("tr") || parsed.pathname.includes("/tr:")) return url;
+    parsed.searchParams.set("tr", `w-${IMAGEKIT_MAX_WIDTH}`);
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}

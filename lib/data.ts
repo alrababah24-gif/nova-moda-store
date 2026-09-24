@@ -9,6 +9,7 @@ import {
 } from "@/data/fallback";
 import type { AboutContent, Brand, Category, Faq, Product, StoreSettings, Testimonial } from "@/lib/types";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { deliverableImageUrl } from "@/lib/utils";
 
 function mapProduct(row: Record<string, unknown>): Product {
   const category = Array.isArray(row.category) ? row.category[0] : row.category;
@@ -22,7 +23,7 @@ function mapProduct(row: Record<string, unknown>): Product {
     size_stock: row.size_stock && typeof row.size_stock === "object" && !Array.isArray(row.size_stock)
       ? Object.fromEntries(Object.entries(row.size_stock as Record<string, unknown>).map(([key, value]) => [key, Math.max(0, Number(value ?? 0))]))
       : {},
-    colors: Array.isArray(row.colors) ? row.colors.map(String) : [], images: Array.isArray(row.images) ? row.images.map(String) : [],
+    colors: Array.isArray(row.colors) ? row.colors.map(String) : [], images: Array.isArray(row.images) ? row.images.map((image) => deliverableImageUrl(String(image))) : [],
     stock: Number(row.stock ?? 0), featured: Boolean(row.featured), active: Boolean(row.active),
     created_at: row.created_at ? String(row.created_at) : undefined, updated_at: row.updated_at ? String(row.updated_at) : undefined,
   };

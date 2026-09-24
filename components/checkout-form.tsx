@@ -1,4 +1,3 @@
-// @ts-nochek
 "use client";
 
 import { useState, type FormEvent } from "react";
