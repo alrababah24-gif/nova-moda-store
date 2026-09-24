@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import FacebookViewContent from "@/components/facebook-viewcontent"
 import { useCart } from "@/components/cart-provider"
@@ -11,6 +11,12 @@ export function ProductDetailClient({ product, settings }: any) {
   const cart: any = useCart()
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [activeImg, setActiveImg] = useState(0)
+  const [mounted, setMounted] = useState(false)
+
+  // مهم: عشان نحل خطأ React #418
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const images = product?.images?.length ? product.images : ["/placeholder.svg"]
   const sizes: string[] = product?.sizes || []
@@ -23,38 +29,51 @@ export function ProductDetailClient({ product, settings }: any) {
     const priceNum = Number(price) || 0
     const totalValue = priceNum * (qty || 1)
 
-    // 1. أضف للسلة (نفس كودك القديم)
     if (cart.addToCart) cart.addToCart(p, selectedSize, qty)
     else if (cart.addItem) cart.addItem(p, qty)
     else if (cart.add) cart.add(p, qty)
-    else if (typeof cart === "function") cart(p)
 
-    // 2. ابعت حدث AddToCart لفيسبوك مع value و currency (هذا اللي بيرفع الجودة من 6.1 لـ 8.5)
     if (typeof window !== "undefined" && (window as any).fbq && cleanId) {
       ;(window as any).fbq('track', 'AddToCart', {
         content_ids: [cleanId],
         content_type: 'product',
         content_name: String(product.name || cleanId),
         value: Number(totalValue.toFixed(2)),
-        currency: 'USD', // خليه USD عشان ما يطلع تحذير العملة، فيسبوك بفهمه أحسن من JOD
+        currency: 'USD',
       })
       console.log("✅ AddToCart fired:", cleanId, totalValue)
     }
   }
 
+  // عشان نحل Hydration - لا ترسم شي لحد ما يصير mounted
+  if (!mounted) {
+    return (
+      <div className="grid md:grid-cols-[1.05fr_1fr] gap-8 md:gap-12 p-4">
+        <div className="aspect-[4/5] rounded-[20px] bg-gray-100 animate-pulse" />
+        <div className="space-y-4">
+          <div className="h-6 bg-gray-100 rounded animate-pulse" />
+          <div className="h-10 bg-gray-100 rounded animate-pulse" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) return null
+
   return (
-    <>
+    <div suppressHydrationWarning>
       <FacebookViewContent product={product} />
 
       <div className="grid md:grid-cols-[1.05fr_1fr] gap-8 md:gap-12">
         <div>
           <div className="relative aspect-[4/5] rounded-[20px] overflow-hidden bg-[#f6f6f6]">
             <Image
-              src={images[activeImg]}
+              src={images[activeImg] || "/placeholder.svg"}
               alt={product?.name || "product"}
               fill
               className="object-cover"
               priority
+              unoptimized
             />
           </div>
 
@@ -66,7 +85,7 @@ export function ProductDetailClient({ product, settings }: any) {
                   onClick={() => setActiveImg(i)}
                   className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 ${activeImg === i ? "border-black" : "border-transparent"}`}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <Image src={img} alt="" fill className="object-cover" unoptimized />
                 </button>
               ))}
             </div>
@@ -74,13 +93,15 @@ export function ProductDetailClient({ product, settings }: any) {
         </div>
 
         <div className="px-1">
-          <Link href="/products" className="text-sm text-gray-500 hover:text-black">
-            ← العودة للمنتجات
+          <Link href="/products" className="text-sm text-gray-500 hover:text-black" suppressHydrationWarning>
+            العودة للمنتجات
           </Link>
 
-          <h1 className="text-[22px] font-bold mt-3 leading-tight">{product?.name}</h1>
+          <h1 className="text-[22px] font-bold mt-3 leading-tight" suppressHydrationWarning>
+            {product?.name}
+          </h1>
 
-          <div className="mt-3 flex items-baseline gap-3">
+          <div className="mt-3 flex items-baseline gap-3" suppressHydrationWarning>
             <span className="text-xl font-bold">{price} JOD</span>
             {compareAt && compareAt > price && (
               <span className="text-sm text-gray-400 line-through">{compareAt} JOD</span>
@@ -108,13 +129,14 @@ export function ProductDetailClient({ product, settings }: any) {
 
           <div className="flex gap-3 mt-8">
             <div className="flex items-center border rounded-full h-12 px-1">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 h-10">-</button>
-              <span className="w-8 text-center text-sm">{qty}</span>
-              <button onClick={() => setQty(qty + 1)} className="w-10 h-10">+</button>
+              <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 h-10" type="button">-</button>
+              <span className="w-8 text-center text-sm" suppressHydrationWarning>{qty}</span>
+              <button onClick={() => setQty(qty + 1)} className="w-10 h-10" type="button">+</button>
             </div>
 
             <button
               onClick={handleAddToCart}
+              type="button"
               className="flex-1 h-12 rounded-full bg-black text-white font-medium hover:bg-zinc-800 transition"
             >
               أضف للسلة
@@ -122,12 +144,12 @@ export function ProductDetailClient({ product, settings }: any) {
           </div>
 
           {product?.description && (
-            <div className="mt-8 text-sm text-gray-600 leading-7 whitespace-pre-line">
+            <div className="mt-8 text-sm text-gray-600 leading-7 whitespace-pre-line" suppressHydrationWarning>
               {product.description}
             </div>
           )}
         </div>
       </div>
-    </>
+    </div>
   )
 }
