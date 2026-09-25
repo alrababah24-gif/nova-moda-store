@@ -13,10 +13,16 @@ export async function GET() {
       condition: "new",
       price: `${Number(product.price || 0).toFixed(2)} JOD`,
       link: `https://novamodaabaya.com/product/${product.slug}`,
+
       image_link:
-        Array.isArray(product.images) && product.images.length > 0
+        typeof product.images?.[0] === "string"
           ? product.images[0]
-          : product.image,
+          : product.images?.[0]?.url ||
+            product.images?.[0]?.src ||
+            product.image?.url ||
+            product.image?.src ||
+            (typeof product.image === "string" ? product.image : ""),
+
       brand: product.brand || "Nova Moda Abaya",
     }));
 
@@ -37,7 +43,9 @@ export async function GET() {
     ...products.map((product) =>
       headers
         .map((header) => {
-          const value = String(product[header as keyof typeof product] ?? "");
+          const value = String(
+            product[header as keyof typeof product] ?? ""
+          );
           return `"${value.replace(/"/g, '""')}"`;
         })
         .join(",")
