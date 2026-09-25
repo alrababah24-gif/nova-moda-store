@@ -7,12 +7,14 @@ import {
   Sparkles,
   Truck,
 } from "lucide-react";
+
 import { Hero } from "@/components/hero";
 import { BrandShowcase } from "@/components/brand-showcase";
 import { BrandRail } from "@/components/brand-rail";
 import { ProductGrid } from "@/components/product-grid";
 import { ExperienceBento } from "@/components/experience-bento";
 import { AnimatedSection } from "@/components/ui/animated-section";
+
 import {
   getBrands,
   getCategories,
@@ -33,6 +35,7 @@ export default async function HomePage() {
   return (
     <>
       <BrandRail brands={brands} />
+
       <Hero settings={settings} products={products} />
 
       <section className="home-products-section py-14 sm:py-20">
@@ -60,8 +63,31 @@ export default async function HomePage() {
             </Link>
           </AnimatedSection>
 
-          <ProductGrid products={products} categories={categories} />
+          <ProductGrid
+            products={products}
+            categories={categories}
+          />
         </div>
       </section>
 
-      <section className="border-y border-[var(--line)] bg-[color:var(--surface-glass)] py-8 backdrop-blur
+      <section className="border-y border-[var(--line)] bg-white py-8 backdrop-blur-xl">
+        <div className="container-shell grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            {
+              icon: BadgeCheck,
+              title: "خامات مختارة",
+              text: "ملمس وراحة قبل كل شيء",
+            },
+            {
+              icon: Ruler,
+              title: "مقاسات واضحة",
+              text: "دليل يساعدك قبل الطلب",
+            },
+            {
+              icon: Truck,
+              title: "توصيل 2 د.أ",
+              text: "لكل محافظات الأردن",
+            },
+            {
+              icon: PackageCheck,
+             
