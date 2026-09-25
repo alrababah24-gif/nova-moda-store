@@ -1,25 +1,131 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type ChangeEvent } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import type { StoreSettings } from "@/lib/types";
+import { uploadMedia } from "@/lib/imagekit-upload-client";
+import type { Product, StoreSettings } from "@/lib/types";
 
-export function SettingsManager({ settings }: { settings: StoreSettings }) {
-  const router=useRouter(); const [draft,setDraft]=useState(settings); const [saving,setSaving]=useState(false); const [uploading,setUploading]=useState(false); const [message,setMessage]=useState("");
-  async function uploadLogo(event:ChangeEvent<HTMLInputElement>){const file=event.target.files?.[0];if(!file)return;const supabase=createClient();if(!supabase)return;setUploading(true);setMessage("");try{const ext=file.name.split(".").pop()||"png";const path=`brand/logo-${Date.now()}.${ext}`;const {error}=await supabase.storage.from("brand-assets").upload(path,file,{upsert:false,cacheControl:"3600"});if(error)throw error;const {data}=supabase.storage.from("brand-assets").getPublicUrl(path);setDraft(d=>({...d,logo_url:data.publicUrl}));}catch(e){setMessage(e instanceof Error?e.message:"تعذر رفع الشعار");}finally{setUploading(false);event.target.value="";}}
-  async function save(){const supabase=createClient();if(!supabase)return;setSaving(true);setMessage("");const payload={...draft,id:1,delivery_price:Number(draft.delivery_price||0),updated_at:new Date().toISOString()};const {error}=await supabase.from("store_settings").upsert(payload,{onConflict:"id"});setSaving(false);if(error)setMessage(error.message);else{setMessage("تم حفظ الإعدادات");router.refresh();}}
-  return <div className="space-y-5"><section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6"><div><p className="text-xs font-extrabold tracking-[.14em] text-[#A27E6C]">STORE SETTINGS</p><h1 className="mt-1 text-2xl font-extrabold">إعدادات المتجر والهوية</h1><p className="mt-1 text-xs leading-6 text-[#8C7A72]">غيّري النصوص الرئيسية، التواصل، الألوان والشعار بدون تعديل الكود.</p></div>
-    <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"><Field label="اسم المتجر"><input className="admin-input mt-2" value={draft.store_name} onChange={e=>setDraft({...draft,store_name:e.target.value})}/></Field><Field label="رسالة التوصيل المختصرة"><input className="admin-input mt-2" value={draft.top_bar_text} onChange={e=>setDraft({...draft,top_bar_text:e.target.value})}/></Field><Field label="سعر التوصيل"><input type="number" step="0.01" className="admin-input mt-2" value={draft.delivery_price} onChange={e=>setDraft({...draft,delivery_price:Number(e.target.value)})}/></Field><Field label="واتساب"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.whatsapp} onChange={e=>setDraft({...draft,whatsapp:e.target.value})}/></Field><Field label="الهاتف"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.phone} onChange={e=>setDraft({...draft,phone:e.target.value})}/></Field><Field label="وصف ساعات العمل"><input className="admin-input mt-2" value={draft.hours} onChange={e=>setDraft({...draft,hours:e.target.value})}/></Field><Field label="وقت فتح المتجر"><input type="time" dir="ltr" className="admin-input mt-2 text-left" value={draft.open_time} onChange={e=>setDraft({...draft,open_time:e.target.value})}/></Field><Field label="وقت إغلاق المتجر"><input type="time" dir="ltr" className="admin-input mt-2 text-left" value={draft.close_time} onChange={e=>setDraft({...draft,close_time:e.target.value})}/></Field><Field label="العنوان" className="md:col-span-2 xl:col-span-3"><input className="admin-input mt-2" value={draft.address} onChange={e=>setDraft({...draft,address:e.target.value})}/></Field><Field label="فيسبوك"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.facebook} onChange={e=>setDraft({...draft,facebook:e.target.value})}/></Field><Field label="إنستغرام"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.instagram} onChange={e=>setDraft({...draft,instagram:e.target.value})}/></Field><div/><Field label="اللون الرئيسي"><div className="mt-2 flex gap-2"><input type="color" className="h-11 w-14 rounded-xl border border-[#E6D8CE] bg-white p-1" value={draft.primary_color} onChange={e=>setDraft({...draft,primary_color:e.target.value})}/><input dir="ltr" className="admin-input text-left" value={draft.primary_color} onChange={e=>setDraft({...draft,primary_color:e.target.value})}/></div></Field><Field label="لون الخلفية"><div className="mt-2 flex gap-2"><input type="color" className="h-11 w-14 rounded-xl border border-[#E6D8CE] bg-white p-1" value={draft.background_color} onChange={e=>setDraft({...draft,background_color:e.target.value})}/><input dir="ltr" className="admin-input text-left" value={draft.background_color} onChange={e=>setDraft({...draft,background_color:e.target.value})}/></div></Field></div>
-  </section>
+export function SettingsManager({ settings, products }: { settings: StoreSettings; products: Product[] }) {
+  const router = useRouter();
+  const [draft, setDraft] = useState(settings);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  <section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6"><h2 className="text-xl font-extrabold">الواجهة الرئيسية (Hero)</h2><div className="mt-5 grid gap-4 md:grid-cols-2"><Field label="النص الصغير"><input className="admin-input mt-2" value={draft.hero_eyebrow} onChange={e=>setDraft({...draft,hero_eyebrow:e.target.value})}/></Field><Field label="العنوان الرئيسي"><input className="admin-input mt-2" value={draft.hero_title} onChange={e=>setDraft({...draft,hero_title:e.target.value})}/></Field><Field label="الوصف" className="md:col-span-2"><textarea rows={4} className="admin-input mt-2 resize-none" value={draft.hero_description} onChange={e=>setDraft({...draft,hero_description:e.target.value})}/></Field><Field label="زر التسوق"><input className="admin-input mt-2" value={draft.hero_primary_cta} onChange={e=>setDraft({...draft,hero_primary_cta:e.target.value})}/></Field><Field label="زر التواصل"><input className="admin-input mt-2" value={draft.hero_secondary_cta} onChange={e=>setDraft({...draft,hero_secondary_cta:e.target.value})}/></Field></div></section>
+  const selectedHeroProduct = useMemo(
+    () => products.find((product) => product.id === draft.hero_product_id) || null,
+    [products, draft.hero_product_id],
+  );
 
-  <section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6"><h2 className="text-xl font-extrabold">الشعار</h2><p className="mt-1 text-xs text-[#8C7A72]">الشعار الافتراضي مأخوذ من الهوية التي أرسلتها. يمكنك استبداله في أي وقت.</p><div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center"><div className="grid min-h-40 w-full place-items-center rounded-2xl border border-[#EEE1D7] bg-[#FDF6F0] p-4 sm:w-60"><Image src={draft.logo_url||"/brand/nova-moda-mark-clean.png"} alt="شعار المتجر" width={220} height={220} className="max-h-36 w-auto object-contain"/></div><div className="flex flex-wrap gap-2"><label className="flex cursor-pointer items-center gap-2 rounded-full bg-[#3D2B24] px-5 py-3 text-xs font-extrabold text-white"><ImagePlus size={14}/>{uploading?"جاري الرفع...":"رفع شعار جديد"}<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden onChange={uploadLogo} disabled={uploading}/></label>{draft.logo_url&&<button onClick={()=>setDraft({...draft,logo_url:null})} className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-3 text-xs font-bold text-red-700"><Trash2 size={13}/>استخدام الشعار الافتراضي</button>}</div></div></section>
+  async function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setMessage("");
+    try {
+      const uploaded = await uploadMedia(file, "store");
+      setDraft((current) => ({ ...current, logo_url: uploaded.url }));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "تعذر رفع الشعار");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
 
-  <div className="sticky bottom-4 z-20 flex items-center gap-3 rounded-2xl border border-[#E2D2C6] bg-white/95 p-3 shadow-xl backdrop-blur">{message&&<p className="min-w-0 flex-1 text-xs font-bold text-[#6F5B52]">{message}</p>}<button disabled={saving||uploading} onClick={save} className="mr-auto flex min-h-11 items-center gap-2 rounded-full bg-[#3D2B24] px-6 text-xs font-extrabold text-white disabled:opacity-50">{saving?<Loader2 className="animate-spin" size={14}/>:<Save size={14}/>}حفظ كل الإعدادات</button></div></div>;
+  async function save() {
+    const supabase = createClient();
+    if (!supabase) return;
+    setSaving(true);
+    setMessage("");
+    const payload = {
+      ...draft,
+      id: 1,
+      hero_product_id: draft.hero_product_id || null,
+      delivery_price: Number(draft.delivery_price || 0),
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("store_settings").upsert(payload, { onConflict: "id" });
+    setSaving(false);
+    if (error) setMessage(error.message);
+    else {
+      setMessage("تم حفظ الإعدادات. موديل الواجهة يتغير فوراً بدون الحاجة لتعديل الكود.");
+      router.refresh();
+    }
+  }
+
+  return <div className="space-y-5">
+    <section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6">
+      <div>
+        <p className="text-xs font-extrabold tracking-[.14em] text-[#A27E6C]">STORE SETTINGS</p>
+        <h1 className="mt-1 text-2xl font-extrabold">إعدادات المتجر والهوية</h1>
+        <p className="mt-1 text-xs leading-6 text-[#8C7A72]">غيّري النصوص الرئيسية، التواصل، الألوان، موديل الواجهة والشعار بدون تعديل الكود.</p>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <Field label="اسم المتجر"><input className="admin-input mt-2" value={draft.store_name} onChange={(e)=>setDraft({...draft,store_name:e.target.value})}/></Field>
+        <Field label="رسالة التوصيل المختصرة"><input className="admin-input mt-2" value={draft.top_bar_text} onChange={(e)=>setDraft({...draft,top_bar_text:e.target.value})}/></Field>
+        <Field label="سعر التوصيل"><input type="number" step="0.01" className="admin-input mt-2" value={draft.delivery_price} onChange={(e)=>setDraft({...draft,delivery_price:Number(e.target.value)})}/></Field>
+        <Field label="واتساب"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.whatsapp} onChange={(e)=>setDraft({...draft,whatsapp:e.target.value})}/></Field>
+        <Field label="الهاتف"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.phone} onChange={(e)=>setDraft({...draft,phone:e.target.value})}/></Field>
+        <Field label="وصف ساعات العمل"><input className="admin-input mt-2" value={draft.hours} onChange={(e)=>setDraft({...draft,hours:e.target.value})}/></Field>
+        <Field label="وقت فتح المتجر"><input type="time" dir="ltr" className="admin-input mt-2 text-left" value={draft.open_time} onChange={(e)=>setDraft({...draft,open_time:e.target.value})}/></Field>
+        <Field label="وقت إغلاق المتجر"><input type="time" dir="ltr" className="admin-input mt-2 text-left" value={draft.close_time} onChange={(e)=>setDraft({...draft,close_time:e.target.value})}/></Field>
+        <Field label="العنوان" className="md:col-span-2 xl:col-span-3"><input className="admin-input mt-2" value={draft.address} onChange={(e)=>setDraft({...draft,address:e.target.value})}/></Field>
+        <Field label="فيسبوك"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.facebook} onChange={(e)=>setDraft({...draft,facebook:e.target.value})}/></Field>
+        <Field label="إنستغرام"><input dir="ltr" className="admin-input mt-2 text-left" value={draft.instagram} onChange={(e)=>setDraft({...draft,instagram:e.target.value})}/></Field>
+        <div/>
+        <Field label="اللون الرئيسي"><div className="mt-2 flex gap-2"><input type="color" className="h-11 w-14 rounded-xl border border-[#E6D8CE] bg-white p-1" value={draft.primary_color} onChange={(e)=>setDraft({...draft,primary_color:e.target.value})}/><input dir="ltr" className="admin-input text-left" value={draft.primary_color} onChange={(e)=>setDraft({...draft,primary_color:e.target.value})}/></div></Field>
+        <Field label="لون الخلفية"><div className="mt-2 flex gap-2"><input type="color" className="h-11 w-14 rounded-xl border border-[#E6D8CE] bg-white p-1" value={draft.background_color} onChange={(e)=>setDraft({...draft,background_color:e.target.value})}/><input dir="ltr" className="admin-input text-left" value={draft.background_color} onChange={(e)=>setDraft({...draft,background_color:e.target.value})}/></div></Field>
+      </div>
+    </section>
+
+    <section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6">
+      <h2 className="text-xl font-extrabold">الواجهة الرئيسية (Hero)</h2>
+      <p className="mt-1 text-xs leading-6 text-[#8C7A72]">موديل الواجهة لم يعد آخر منتج نزل. اختاري أي عباية من القائمة وسيبقى هو الظاهر حتى تغيّريه بنفسك.</p>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <Field label="موديل الواجهة" className="md:col-span-2">
+          <select className="admin-input mt-2" value={draft.hero_product_id || ""} onChange={(e)=>setDraft({...draft,hero_product_id:e.target.value || null})}>
+            <option value="">اختيار تلقائي من المنتجات المميزة</option>
+            {products.filter((product)=>product.active).map((product)=><option key={product.id} value={product.id}>{product.name}</option>)}
+          </select>
+        </Field>
+
+        {selectedHeroProduct && <div className="md:col-span-2 flex items-center gap-4 rounded-2xl border border-[#EEE1D7] bg-[#FFFCF9] p-3">
+          <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-[#FDF6F0]">
+            <Image src={selectedHeroProduct.images[0] || "/products/abaya-classic-beige.svg"} alt={selectedHeroProduct.name} fill className="object-contain p-1" sizes="96px"/>
+          </div>
+          <div><p className="text-[10px] font-extrabold text-[#A27E6C]">الموديل المختار للواجهة</p><strong className="mt-1 block text-sm">{selectedHeroProduct.name}</strong><p className="mt-2 text-[10px] text-[#8C7A72]">صور هذا الموديل فقط هي التي ستظهر في مساحة الصور الكبيرة أعلى الصفحة.</p></div>
+        </div>}
+
+        <Field label="النص الصغير"><input className="admin-input mt-2" value={draft.hero_eyebrow} onChange={(e)=>setDraft({...draft,hero_eyebrow:e.target.value})}/></Field>
+        <Field label="العنوان الرئيسي"><input className="admin-input mt-2" value={draft.hero_title} onChange={(e)=>setDraft({...draft,hero_title:e.target.value})}/></Field>
+        <Field label="الوصف" className="md:col-span-2"><textarea rows={4} className="admin-input mt-2 resize-none" value={draft.hero_description} onChange={(e)=>setDraft({...draft,hero_description:e.target.value})}/></Field>
+        <Field label="زر التسوق"><input className="admin-input mt-2" value={draft.hero_primary_cta} onChange={(e)=>setDraft({...draft,hero_primary_cta:e.target.value})}/></Field>
+        <Field label="زر التواصل"><input className="admin-input mt-2" value={draft.hero_secondary_cta} onChange={(e)=>setDraft({...draft,hero_secondary_cta:e.target.value})}/></Field>
+      </div>
+    </section>
+
+    <section className="rounded-2xl border border-[#E6D8CE] bg-white p-5 sm:p-6">
+      <h2 className="text-xl font-extrabold">الشعار</h2>
+      <p className="mt-1 text-xs text-[#8C7A72]">الشعار الافتراضي مأخوذ من الهوية التي أرسلتها. يمكنك استبداله في أي وقت.</p>
+      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="grid min-h-40 w-full place-items-center rounded-2xl border border-[#EEE1D7] bg-[#FDF6F0] p-4 sm:w-60"><Image src={draft.logo_url||"/brand/nova-moda-mark-clean.png"} alt="شعار المتجر" width={220} height={220} className="max-h-36 w-auto object-contain"/></div>
+        <div className="flex flex-wrap gap-2"><label className="flex cursor-pointer items-center gap-2 rounded-full bg-[#3D2B24] px-5 py-3 text-xs font-extrabold text-white"><ImagePlus size={14}/>{uploading?"جاري الرفع...":"رفع شعار جديد"}<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden onChange={uploadLogo} disabled={uploading}/></label>{draft.logo_url&&<button onClick={()=>setDraft({...draft,logo_url:null})} className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-3 text-xs font-bold text-red-700"><Trash2 size={13}/>استخدام الشعار الافتراضي</button>}</div>
+      </div>
+    </section>
+
+    <div className="sticky bottom-4 z-20 flex items-center gap-3 rounded-2xl border border-[#E2D2C6] bg-white/95 p-3 shadow-xl backdrop-blur">
+      {message&&<p className="min-w-0 flex-1 text-xs font-bold text-[#6F5B52]">{message}</p>}
+      <button disabled={saving||uploading} onClick={save} className="mr-auto flex min-h-11 items-center gap-2 rounded-full bg-[#3D2B24] px-6 text-xs font-extrabold text-white disabled:opacity-50">{saving?<Loader2 className="animate-spin" size={14}/>:<Save size={14}/>}حفظ كل الإعدادات</button>
+    </div>
+  </div>;
 }
 
-function Field({label,className="",children}:{label:string;className?:string;children:React.ReactNode}){return <label className={`block text-xs font-bold ${className}`}>{label}{children}</label>}
+function Field({label,className="",children}:{label:string;className?:string;children:React.ReactNode}) {
+  return <label className={`block text-xs font-bold ${className}`}>{label}{children}</label>;
+}
