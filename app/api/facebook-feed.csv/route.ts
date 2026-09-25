@@ -38,6 +38,16 @@ function getImageUrl(images: unknown): string {
   return "";
 }
 
+export async function HEAD() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/csv",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -59,15 +69,12 @@ export async function GET() {
     if (error) {
       console.error("Facebook feed Supabase error:", error);
 
-      return new NextResponse(
-        `Supabase error: ${error.message}`,
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "text/plain; charset=utf-8",
-          },
-        }
-      );
+      return new NextResponse(`Supabase error: ${error.message}`, {
+        status: 500,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      });
     }
 
     const products = data ?? [];
@@ -127,7 +134,7 @@ export async function GET() {
     return new NextResponse(csv, {
       status: 200,
       headers: {
-        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Type": "text/csv",
         "Cache-Control": "no-store",
       },
     });
