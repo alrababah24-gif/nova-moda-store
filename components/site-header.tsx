@@ -4,29 +4,244 @@
 import Link from "next/link"
 import { useCart } from "./cart-provider"
 
-export function SiteHeader() {
-  const cart = useCart()
-  // مهم: قبل ما يتحمل المتصفح نعرض 0 ثابت عشان السيرفر والكلاينت نفس الشي
-  const count = cart?.mounted ? cart.count : 0
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Menu,
+  Search,
+  ShoppingBag,
+  X,
+  Sparkles,
+  Ruler,
+  Tags,
+} from "lucide-react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "motion/react";
+import { useState } from "react";
+import type { StoreSettings } from "@/lib/types";
+import { useCart } from "@/components/cart-provider";
+import { SearchDialog } from "@/components/search-dialog";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLockup } from "@/components/brand-lockup";
+import { AccountMenu } from "@/components/account/account-menu";
+
+const nav = [
+  ["الرئيسية", "/"],
+  ["البراندات", "/brands"],
+  ["وصل حديثاً", "/collections/new"],
+  ["كل العبايات", "/shop"],
+  ["المجموعات", "/collections"],
+  ["دليل المقاسات", "/size-guide"],
+  ["من نحن", "/about"],
+] as const;
+
+export function SiteHeader({
+  settings,
+}: {
+  settings: StoreSettings;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const pathname = usePathname();
+  const cart = useCart();
+  const reduce = useReducedMotion();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur" suppressHydrationWarning>
-      <div className="flex h-16 items-center justify-between px-4 max-w-7xl mx-auto" suppressHydrationWarning>
-        <Link href="/" className="font-bold text-xl">Nova Moda</Link>
-        <nav className="flex items-center gap-6 text-sm" suppressHydrationWarning>
-          <Link href="/products">المنتجات</Link>
-          <Link href="/cart" className="relative" suppressHydrationWarning>
-            السلة
-            <span suppressHydrationWarning className="absolute -top-2 -right-3 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-              {count}
-            </span>
-          </Link>
+    <>
+      <header className="site-header sticky top-0 z-50 border-b border-[var(--line)] bg-[color:var(--surface-glass)] backdrop-blur-2xl">
+        <div className="container-shell relative grid h-[80px] grid-cols-[1fr_auto_1fr] items-center md:h-[96px]">
+          
+          <div className="flex items-center gap-1 justify-self-start">
+            <button
+              className="header-icon md:hidden"
+              onClick={() => setMenuOpen(true)}
+              aria-label="فتح القائمة"
+            >
+              <Menu size={20} />
+            </button>
+
+            <button
+              className="header-icon"
+              onClick={() => setSearchOpen(true)}
+              aria-label="بحث"
+            >
+              <Search size={18} />
+            </button>
+
+            <div className="hidden md:block">
+              <ThemeToggle compact />
+            </div>
+          </div>
+
+          <div className="justify-self-center">
+            <BrandLockup settings={settings} />
+          </div>
+
+          <div className="flex items-center gap-1 justify-self-end">
+            <AccountMenu />
+
+            <button
+              onClick={() => cart.setIsOpen(true)}
+              className="header-icon relative"
+              aria-label={`السلة - ${cart.count} عناصر`}
+            >
+              <ShoppingBag size={19} />
+
+              {cart.count > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--brand)] px-1 text-[9px] font-extrabold text-white dark:text-black">
+                  {cart.count}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <nav className="hidden border-t border-[var(--line)] md:block">
+          <div className="container-shell flex h-12 items-center justify-center gap-6 text-[12px] font-extrabold lg:gap-8">
+            {nav.map(([label, href]) => {
+              const active =
+                href === "/"
+                  ? pathname === href
+                  : pathname.startsWith(href);
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`relative py-4 transition hover:text-[var(--brand-strong)] ${
+                    active ? "text-[var(--brand-strong)]" : ""
+                  }`}
+                >
+                  {label}
+
+                  {active && (
+                    <motion.span
+                      layoutId="nav-active"
+                      className="absolute inset-x-1 bottom-1 h-[2px] rounded-full bg-[var(--brand)]"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
-      </div>
-      {/* بانر التوصيل - لازم suppressHydrationWarning عشان 0 د.أ */}
-      <div suppressHydrationWarning className="text-center text-xs py-1 bg-gray-50">التوصيل 0 د.أ</div>
-    </header>
-  )
+      </header>
+
+      <SearchDialog
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] bg-black/40 backdrop-blur-sm md:hidden"
+            onMouseDown={(e) => {
+              if (e.currentTarget === e.target) {
+                setMenuOpen(false);
+              }
+            }}
+          >
+            <motion.aside
+              initial={reduce ? false : { x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{
+                type: "spring",
+                damping: 28,
+                stiffness: 260,
+              }}
+              className="mr-0 min-h-full w-[88%] max-w-sm border-l border-[var(--line)] bg-[var(--surface)] p-5"
+            >
+              <div className="flex items-center justify-between border-b border-[var(--line)] pb-4">
+                <BrandLockup
+                  settings={settings}
+                  compact
+                />
+
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="header-icon"
+                  aria-label="إغلاق القائمة"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setSearchOpen(true);
+                  }}
+                  className="menu-quick"
+                >
+                  <Search size={16} />
+                  <span>بحث</span>
+                </button>
+
+                <Link
+                  href="/brands"
+                  onClick={() => setMenuOpen(false)}
+                  className="menu-quick"
+                >
+                  <Tags size={16} />
+                  <span>البراندات</span>
+                </Link>
+
+                <Link
+                  href="/size-guide"
+                  onClick={() => setMenuOpen(false)}
+                  className="menu-quick"
+                >
+                  <Ruler size={16} />
+                  <span>المقاسات</span>
+                </Link>
+              </div>
+
+              <nav className="mt-5">
+                {nav.map(([label, href], index) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between border-b border-[var(--line)] py-4 text-[15px] font-extrabold"
+                  >
+                    <span>{label}</span>
+                    <span className="text-[10px] text-[var(--muted)]">
+                      0{index + 1}
+                    </span>
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-5 flex items-center justify-between rounded-2xl bg-[var(--surface-soft)] p-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles
+                    size={15}
+                    className="text-[var(--brand-strong)]"
+                  />
+
+                  <span className="text-xs font-extrabold">
+                    المظهر
+                  </span>
+                </div>
+
+                <ThemeToggle compact />
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
 }
 
 export default SiteHeader

@@ -70,10 +70,12 @@ function formatBusinessTime(value: string) {
 }
 
 export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
-  const [now, setNow] = useState(() => new Date());
+  // Start empty so the server HTML and the first client render match; the clock fills in after mount.
+  const [now, setNow] = useState<Date | null>(null);
   const [weather, setWeather] = useState<WeatherPayload | null>(null);
 
   useEffect(() => {
+    setNow(new Date());
     const timer = window.setInterval(() => setNow(new Date()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
@@ -100,6 +102,7 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
 
   const dateLabel = useMemo(
     () =>
+      now &&
       new Intl.DateTimeFormat("ar-JO-u-nu-latn", {
         timeZone: AMMAN_TIMEZONE,
         weekday: "short",
@@ -110,6 +113,7 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
   );
   const timeLabel = useMemo(
     () =>
+      now &&
       new Intl.DateTimeFormat("ar-JO-u-nu-latn", {
         timeZone: AMMAN_TIMEZONE,
         hour: "numeric",
@@ -136,11 +140,11 @@ export function TopUtilityBar({ settings }: { settings: StoreSettings }) {
             </div>
             <div className="status-chip">
               <span className="status-icon"><Clock3 size={13} /></span>
-              <span><b>{timeLabel}</b><small>بتوقيت عمّان</small></span>
+              <span><b>{timeLabel || "--:--"}</b><small>بتوقيت عمّان</small></span>
             </div>
             <div className="status-chip">
               <span className="status-icon"><CalendarDays size={13} /></span>
-              <span><b>{dateLabel}</b><small>التاريخ اليوم</small></span>
+              <span><b>{dateLabel || "—"}</b><small>التاريخ اليوم</small></span>
             </div>
             <div className="status-chip">
               <span className="status-icon"><WeatherIcon size={14} /></span>

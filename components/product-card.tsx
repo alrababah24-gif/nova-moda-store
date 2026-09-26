@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ArrowUpLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import type { Product } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, imageKitUrl } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: Product }) {
   const reduce = useReducedMotion();
@@ -47,7 +47,7 @@ export function ProductCard({ product }: { product: Product }) {
               className="absolute inset-0"
             >
               <Image
-                src={images[activeImage]}
+                src={imageKitUrl(images[activeImage], 1200)}
                 alt={product.name}
                 fill
                 sizes="(max-width:640px) 50vw,(max-width:1024px) 33vw,25vw"
