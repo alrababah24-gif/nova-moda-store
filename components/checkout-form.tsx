@@ -26,7 +26,7 @@ export function CheckoutForm({ settings, databaseReady }: { settings: StoreSetti
       city: String(form.get("city") || ""),
       address: String(form.get("address") || ""),
       notes: String(form.get("notes") || ""),
-      items: cart.items.map((item) => ({ productId: item.productId, size: item.size, color: item.color, qty: item.qty })),
+      items: cart.items.map((item) => ({ productId: item.id, size: item.size, color: item.color, qty: item.qty })),
     };
 
     setLoading(true); setError("");
