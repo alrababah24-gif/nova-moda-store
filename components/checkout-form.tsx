@@ -45,7 +45,7 @@ export function CheckoutForm({
 
       items: cart.items.map((item) => ({
         productId: String(item.id || ""),
-        size: String(item.size || item.selectedSize || ""),
+        size: String(item.size || item.selectedSize || "غير محدد"),
         color: item.color ? String(item.color) : undefined,
         qty: Number(item.qty ?? item.quantity ?? 1),
       })),
