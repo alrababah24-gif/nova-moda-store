@@ -1,21 +1,28 @@
 // @ts-nocheck
-// FINAL CART DRAWER - زر X بشتغل 100%
 "use client"
+
+import Image from "next/image"
 import Link from "next/link"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { useCart } from "./cart-provider"
 
+const formatPrice = (value: number) =>
+  `${Number(value || 0).toFixed(3)} JOD`
+
 export function CartDrawer() {
-  const cart = useCart();
-  const reduce = useReducedMotion();
+  const cart = useCart()
+  const reduce = useReducedMotion()
 
   const closeCart = () => {
-    cart.setIsOpen(false);
-  };
+    cart.setIsOpen(false)
+  }
 
   return (
     <AnimatePresence>
       {cart.isOpen && (
         <>
+          {/* الخلفية */}
           <motion.button
             aria-label="إغلاق السلة"
             className="fixed inset-0 z-[80] bg-[#241711]/35 backdrop-blur-[2px]"
@@ -25,18 +32,26 @@ export function CartDrawer() {
             exit={{ opacity: 0 }}
           />
 
+          {/* السلة */}
           <motion.aside
             dir="rtl"
             className="fixed inset-y-0 left-0 z-[90] flex w-full max-w-[420px] flex-col bg-[var(--paper)] shadow-2xl"
             initial={reduce ? false : { x: "-100%" }}
             animate={{ x: 0 }}
             exit={reduce ? undefined : { x: "-100%" }}
-            transition={{ type: "spring", stiffness: 310, damping: 32 }}
+            transition={{
+              type: "spring",
+              stiffness: 310,
+              damping: 32,
+            }}
           >
+            {/* الرأس */}
             <div className="flex items-center justify-between border-b border-[#F0E6DC] px-5 py-5">
               <div className="flex items-center gap-2">
                 <ShoppingBag size={20} />
+
                 <strong>سلة التسوق</strong>
+
                 <span className="rounded-full bg-[#F0E6DC] px-2 py-0.5 text-xs">
                   {cart.count}
                 </span>
@@ -51,6 +66,7 @@ export function CartDrawer() {
               </button>
             </div>
 
+            {/* المنتجات */}
             <div className="flex-1 overflow-y-auto px-5 py-4">
               {cart.items.length === 0 ? (
                 <div className="grid min-h-[55vh] place-items-center text-center">
@@ -77,115 +93,123 @@ export function CartDrawer() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {cart.items.map((item) => (
-                    <div
-                      key={`${item.id}-${item.size || item.selectedSize || ""}-${item.color ?? ""}`}
-                      className="flex gap-3 rounded-2xl border border-[#F0E6DC] bg-white p-3"
-                    >
-                      <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[#FDF6F0]">
-                        <Image
-                          src={item.image}
-                          alt={item.name || ""}
-                          fill
-                          sizes="80px"
-                          className="object-contain p-1"
-                        />
-                      </div>
+                  {cart.items.map((item) => {
+                    const qty = Number(
+                      item.qty ?? item.quantity ?? 1
+                    )
 
-                      <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-sm font-bold leading-6">
-                          {item.name}
-                        </p>
+                    const selectedSize =
+                      item.size || item.selectedSize || ""
 
-                        <p className="mt-1 text-xs text-[#8C7A72]">
-                          المقاس:{" "}
-                          {item.size || item.selectedSize || "غير محدد"}
-                          {item.color ? ` • ${item.color}` : ""}
-                          {typeof item.maxStock === "number"
-                            ? ` • المتوفر ${item.maxStock}`
-                            : ""}
-                        </p>
+                    const imageSrc =
+                      item.image ||
+                      item.images?.[0] ||
+                      "/placeholder.svg"
 
-                        <div className="mt-3 flex items-center justify-between gap-2">
-                          <strong className="text-sm">
-                            {formatPrice(
-                              Number(item.price || 0) *
-                                Number(item.qty ?? item.quantity ?? 1)
-                            )}
-                          </strong>
+                    return (
+                      <div
+                        key={`${item.id}-${selectedSize}-${item.color ?? ""}`}
+                        className="flex gap-3 rounded-2xl border border-[#F0E6DC] bg-white p-3"
+                      >
+                        {/* الصورة */}
+                        <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[#FDF6F0]">
+                          <Image
+                            src={imageSrc}
+                            alt={item.name || ""}
+                            fill
+                            sizes="80px"
+                            className="object-contain p-1"
+                          />
+                        </div>
 
-                          <div className="flex items-center gap-1">
-                            <button
-                              className="grid h-7 w-7 place-items-center rounded-full border border-[#F0E6DC]"
-                              onClick={() =>
-                                cart.updateQty(
-                                  item.id,
-                                  Number(item.qty ?? item.quantity ?? 1) - 1,
-                                  item.size || item.selectedSize
-                                )
-                              }
-                              aria-label="تقليل الكمية"
-                            >
-                              <Minus size={12} />
-                            </button>
+                        {/* معلومات المنتج */}
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 text-sm font-bold leading-6">
+                            {item.name}
+                          </p>
 
-                            <span className="w-6 text-center text-xs font-bold">
-                              {Number(item.qty ?? item.quantity ?? 1)}
-                            </span>
+                          <p className="mt-1 text-xs text-[#8C7A72]">
+                            المقاس:{" "}
+                            {selectedSize || "غير محدد"}
 
-                            <button
-                              disabled={
-                                typeof item.maxStock === "number" &&
-                                Number(item.qty ?? item.quantity ?? 1) >=
-                                  Math.min(item.maxStock, 10)
-                              }
-                              className="grid h-7 w-7 place-items-center rounded-full border border-[#F0E6DC] disabled:cursor-not-allowed disabled:opacity-30"
-                              onClick={() =>
-                                cart.updateQty(
-                                  item.id,
-                                  Number(item.qty ?? item.quantity ?? 1) + 1,
-                                  item.size || item.selectedSize
-                                )
-                              }
-                              aria-label="زيادة الكمية"
-                            >
-                              <Plus size={12} />
-                            </button>
+                            {item.color
+                              ? ` • ${item.color}`
+                              : ""}
 
-                            <button
-                              className="mr-1 grid h-7 w-7 place-items-center rounded-full text-red-500"
-                              onClick={() =>
-                                cart.removeItem(
-                                  item.id,
-                                  item.size || item.selectedSize
-                                )
-                              }
-                              aria-label="حذف"
-                            >
-                              <Trash2 size={13} />
-                            </button>
+                            {typeof item.maxStock === "number"
+                              ? ` • المتوفر ${item.maxStock}`
+                              : ""}
+                          </p>
+
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <strong className="text-sm">
+                              {formatPrice(
+                                Number(item.price || 0) * qty
+                              )}
+                            </strong>
+
+                            {/* التحكم بالكمية */}
+                            <div className="flex items-center gap-1">
+                              <button
+                                className="grid h-7 w-7 place-items-center rounded-full border border-[#F0E6DC]"
+                                onClick={() =>
+                                  cart.updateQty(
+                                    item.id,
+                                    qty - 1,
+                                    selectedSize
+                                  )
+                                }
+                                aria-label="تقليل الكمية"
+                              >
+                                <Minus size={12} />
+                              </button>
+
+                              <span className="w-6 text-center text-xs font-bold">
+                                {qty}
+                              </span>
+
+                              <button
+                                disabled={
+                                  typeof item.maxStock === "number" &&
+                                  qty >= Math.min(item.maxStock, 10)
+                                }
+                                className="grid h-7 w-7 place-items-center rounded-full border border-[#F0E6DC] disabled:cursor-not-allowed disabled:opacity-30"
+                                onClick={() =>
+                                  cart.updateQty(
+                                    item.id,
+                                    qty + 1,
+                                    selectedSize
+                                  )
+                                }
+                                aria-label="زيادة الكمية"
+                              >
+                                <Plus size={12} />
+                              </button>
+
+                              {/* حذف */}
+                              <button
+                                className="mr-1 grid h-7 w-7 place-items-center rounded-full text-red-500"
+                                onClick={() =>
+                                  cart.removeItem(
+                                    item.id,
+                                    selectedSize
+                                  )
+                                }
+                                aria-label="حذف"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    )
+                  })}
                 </div>
-              ))
-            )}
-          </div>
-
-          {/* Footer */}
-          {items && items.length > 0 && (
-            <div className="p-4 border-t space-y-3">
-              <div className="flex justify-between font-bold">
-                <span>المجموع</span>
-                <span>{Number(total).toFixed(3)} JOD</span>
-              </div>
-              <Link href="/cart" onClick={() => setIsOpen(false)} className="block w-full h-12 bg-black text-white rounded-full flex items-center justify-center font-medium">
-                إتمام الطلب
-              </Link>
+              )}
             </div>
 
+            {/* أسفل السلة */}
             {cart.items.length > 0 && (
               <div className="border-t border-[#F0E6DC] bg-white p-5">
                 <div className="mb-4 flex items-center justify-between">
@@ -193,7 +217,9 @@ export function CartDrawer() {
                     المجموع قبل التوصيل
                   </span>
 
-                  <strong>{formatPrice(cart.subtotal)}</strong>
+                  <strong>
+                    {formatPrice(cart.subtotal)}
+                  </strong>
                 </div>
 
                 <Link
@@ -209,7 +235,7 @@ export function CartDrawer() {
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }
 
 export default CartDrawer
