@@ -1,11 +1,8 @@
 // @ts-nocheck
-// FINAL FIX - بيطفي #418 - بيعرض نفس الشي بالسيرفر والبراوزر
 "use client"
-import Link from "next/link"
-import { useCart } from "./cart-provider"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Menu,
   Search,
@@ -14,19 +11,20 @@ import {
   Sparkles,
   Ruler,
   Tags,
-} from "lucide-react";
+} from "lucide-react"
 import {
   AnimatePresence,
   motion,
   useReducedMotion,
-} from "motion/react";
-import { useState } from "react";
-import type { StoreSettings } from "@/lib/types";
-import { useCart } from "@/components/cart-provider";
-import { SearchDialog } from "@/components/search-dialog";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { BrandLockup } from "@/components/brand-lockup";
-import { AccountMenu } from "@/components/account/account-menu";
+} from "motion/react"
+import { useState } from "react"
+
+import type { StoreSettings } from "@/lib/types"
+import { useCart } from "@/components/cart-provider"
+import { SearchDialog } from "@/components/search-dialog"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { BrandLockup } from "@/components/brand-lockup"
+import { AccountMenu } from "@/components/account/account-menu"
 
 const nav = [
   ["الرئيسية", "/"],
@@ -36,25 +34,26 @@ const nav = [
   ["المجموعات", "/collections"],
   ["دليل المقاسات", "/size-guide"],
   ["من نحن", "/about"],
-] as const;
+] as const
 
 export function SiteHeader({
   settings,
 }: {
-  settings: StoreSettings;
+  settings: StoreSettings
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
-  const pathname = usePathname();
-  const cart = useCart();
-  const reduce = useReducedMotion();
+  const pathname = usePathname()
+  const cart = useCart()
+  const reduce = useReducedMotion()
 
   return (
     <>
       <header className="site-header sticky top-0 z-50 border-b border-[var(--line)] bg-[color:var(--surface-glass)] backdrop-blur-2xl">
         <div className="container-shell relative grid h-[80px] grid-cols-[1fr_auto_1fr] items-center md:h-[96px]">
-          
+
+          {/* الجهة اليسرى */}
           <div className="flex items-center gap-1 justify-self-start">
             <button
               className="header-icon md:hidden"
@@ -77,10 +76,12 @@ export function SiteHeader({
             </div>
           </div>
 
+          {/* الشعار */}
           <div className="justify-self-center">
             <BrandLockup settings={settings} />
           </div>
 
+          {/* الجهة اليمنى */}
           <div className="flex items-center gap-1 justify-self-end">
             <AccountMenu />
 
@@ -88,6 +89,7 @@ export function SiteHeader({
               onClick={() => cart.setIsOpen(true)}
               className="header-icon relative"
               aria-label={`السلة - ${cart.count} عناصر`}
+              type="button"
             >
               <ShoppingBag size={19} />
 
@@ -100,13 +102,14 @@ export function SiteHeader({
           </div>
         </div>
 
+        {/* القائمة الرئيسية */}
         <nav className="hidden border-t border-[var(--line)] md:block">
           <div className="container-shell flex h-12 items-center justify-center gap-6 text-[12px] font-extrabold lg:gap-8">
             {nav.map(([label, href]) => {
               const active =
                 href === "/"
                   ? pathname === href
-                  : pathname.startsWith(href);
+                  : pathname.startsWith(href)
 
               return (
                 <Link
@@ -125,17 +128,19 @@ export function SiteHeader({
                     />
                   )}
                 </Link>
-              );
+              )
             })}
           </div>
         </nav>
       </header>
 
+      {/* البحث */}
       <SearchDialog
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
       />
 
+      {/* قائمة الموبايل */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -145,7 +150,7 @@ export function SiteHeader({
             className="fixed inset-0 z-[130] bg-black/40 backdrop-blur-sm md:hidden"
             onMouseDown={(e) => {
               if (e.currentTarget === e.target) {
-                setMenuOpen(false);
+                setMenuOpen(false)
               }
             }}
           >
@@ -170,18 +175,21 @@ export function SiteHeader({
                   onClick={() => setMenuOpen(false)}
                   className="header-icon"
                   aria-label="إغلاق القائمة"
+                  type="button"
                 >
                   <X size={18} />
                 </button>
               </div>
 
+              {/* اختصارات */}
               <div className="mt-4 grid grid-cols-3 gap-2">
                 <button
                   onClick={() => {
-                    setMenuOpen(false);
-                    setSearchOpen(true);
+                    setMenuOpen(false)
+                    setSearchOpen(true)
                   }}
                   className="menu-quick"
+                  type="button"
                 >
                   <Search size={16} />
                   <span>بحث</span>
@@ -206,6 +214,7 @@ export function SiteHeader({
                 </Link>
               </div>
 
+              {/* روابط القائمة */}
               <nav className="mt-5">
                 {nav.map(([label, href], index) => (
                   <Link
@@ -215,6 +224,7 @@ export function SiteHeader({
                     className="flex items-center justify-between border-b border-[var(--line)] py-4 text-[15px] font-extrabold"
                   >
                     <span>{label}</span>
+
                     <span className="text-[10px] text-[var(--muted)]">
                       0{index + 1}
                     </span>
@@ -222,6 +232,7 @@ export function SiteHeader({
                 ))}
               </nav>
 
+              {/* المظهر */}
               <div className="mt-5 flex items-center justify-between rounded-2xl bg-[var(--surface-soft)] p-3">
                 <div className="flex items-center gap-2">
                   <Sparkles
@@ -241,7 +252,7 @@ export function SiteHeader({
         )}
       </AnimatePresence>
     </>
-  );
+  )
 }
 
 export default SiteHeader
