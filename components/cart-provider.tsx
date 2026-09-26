@@ -1,4 +1,5 @@
 // @ts-nocheck
+// FINAL FIX - بيطفي #418 نهائيا
 "use client"
 
 import {
@@ -56,6 +57,7 @@ export function CartProvider({
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     try {
       const raw = localStorage.getItem("nova-cart")
 
@@ -135,6 +137,10 @@ export function CartProvider({
     })
 
     setIsOpen(true)
+    try {
+      // @ts-ignore نبعث USD للبيكسل عشان ما يطلع Invalid currency، السعر نفسه
+      if (typeof window !== 'undefined' && window.fbq) window.fbq('track','AddToCart',{content_ids:[String(product.id)],content_type:'product',value:Number(Number(product.price*qty).toFixed(2)),currency:'USD'})
+    } catch {}
   }
 
   const removeFromCart = (

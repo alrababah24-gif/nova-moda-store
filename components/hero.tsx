@@ -1,140 +1,57 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import { ArrowUpLeft, ChevronLeft, ChevronRight, MessageCircle, Sparkles } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
-import type { Product, StoreSettings } from "@/lib/types";
-
-export function Hero({ settings, products = [] }: { settings: StoreSettings; products?: Product[] }) {
-  const reduce = useReducedMotion();
-
-  const productImages = products
-    .flatMap((product) => product.images || [])
-    .filter((image): image is string => Boolean(image));
-
-  // Keep the slider available even when only one featured product/image exists.
-  const fallbackImages = [
-    "/products/abaya-classic-beige.svg",
-    "/products/abaya-rose-black.svg",
-  ];
-  const images = productImages.length ? Array.from(new Set(productImages)) : fallbackImages;
-
-  const [activeImage, setActiveImage] = useState(0);
-
-  const nextImage = () => {
-    setActiveImage((current) => (current + 1) % images.length);
-  };
-
-  const previousImage = () => {
-    setActiveImage((current) => (current - 1 + images.length) % images.length);
-  };
-
-  const mainImage = images[activeImage];
-  const secondaryImage = images.length > 1 ? images[(activeImage + 1) % images.length] : mainImage;
-
+export function Hero() {
   return (
-    <section className="identity-hero relative overflow-hidden border-b border-[var(--line)]">
-      <div className="identity-hero-mesh" />
-      <div className="identity-hero-word" aria-hidden="true">NOVA</div>
-      <div className="container-shell relative grid min-h-[650px] items-center gap-8 py-12 lg:grid-cols-[1.04fr_.96fr] lg:py-16">
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 34 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-          className="hero-copy order-2 lg:order-1"
-        >
-          <div className="hero-kicker"><Sparkles size={13} /><span>{settings.hero_eyebrow}</span></div>
-          <h1 className="hero-statement">{settings.hero_title}</h1>
-          <p className="hero-description">{settings.hero_description}</p>
-          <div className="hero-actions">
-            <Link href="/shop" className="hero-action-primary">{settings.hero_primary_cta}<ArrowUpLeft size={16} /></Link>
-            <Link href="/brands" className="hero-action-secondary">اكتشفي البراندات</Link>
-            <a href={`https://wa.me/${settings.whatsapp}`} target="_blank" rel="noreferrer" className="hero-action-whatsapp"><MessageCircle size={16} />واتساب</a>
+    <div className="relative bg-[#0a0a0a] text-white overflow-hidden">
+      {/* Subtle gradient glow */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-white/[0.04] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-[600px] h-[600px] bg-white/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      
+      <div className="relative container mx-auto px-6 py-20 md:py-28 lg:py-32">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Small label */}
+          <div className="inline-flex items-center gap-2 border border-white/15 rounded-full px-4 py-1.5 text-[11px] tracking-[0.25em] text-white/60 mb-8">
+            <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
+            NEW COLLECTION 2025
           </div>
-          <div className="hero-signature-line">
-            <span>قصّات محسوبة</span><i />
-            <span>خامات مختارة</span><i />
-            <span>تفاصيل تصنع حضور</span>
+
+          <h1 className="text-[40px] md:text-[64px] lg:text-[72px] font-[700] leading-[0.95] tracking-[-0.03em] mb-6">
+            عبايات
+            <span className="block font-[300] tracking-[0.05em] text-white/80 mt-1">نوفا مودا</span>
+          </h1>
+
+          <p className="text-[15px] md:text-[16px] text-white/50 tracking-[0.15em] mb-10 font-light">
+            فخامة - عصرية - راحة
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="#products" className="inline-flex items-center justify-center bg-white text-black px-8 py-3.5 rounded-full text-[13px] font-bold tracking-wide hover:bg-white/90 transition">
+              تسوقي الآن
+            </a>
+            <a href="#products" className="inline-flex items-center justify-center border border-white/20 text-white px-8 py-3.5 rounded-full text-[13px] tracking-wide hover:bg-white/10 transition">
+              استكشفي المجموعة
+            </a>
           </div>
-        </motion.div>
 
-        <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.96, x: -22 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 0.9, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="hero-visual order-1 min-w-0 w-full lg:order-2"
-        >
-          <div className="hero-fashion-frame">
-            <motion.div
-              animate={reduce ? undefined : { y: [0, -8, 0] }}
-              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-              className="hero-main-image"
-            >
-              <motion.div
-                key={mainImage}
-                initial={reduce ? false : { opacity: 0, scale: 1.035 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={mainImage}
-                  alt="عباية مختارة من نوفا مودا"
-                  fill
-                  priority
-                  className="object-cover object-center"
-                  sizes="(max-width: 1024px) 82vw, 480px"
-                />
-              </motion.div>
-            </motion.div>
-
-            {images.length > 1 && <div className="hero-slider-controls" aria-label="التنقل بين صور العبايات">
-              <button
-                type="button"
-                onClick={previousImage}
-                className="hero-slider-arrow"
-                aria-label="الصورة السابقة"
-              >
-                <ChevronRight size={24} />
-              </button>
-              <button
-                type="button"
-                onClick={nextImage}
-                className="hero-slider-arrow"
-                aria-label="الصورة التالية"
-              >
-                <ChevronLeft size={24} />
-              </button>
-            </div>}
-
-            <motion.div
-              animate={reduce ? undefined : { y: [0, 7, 0], rotate: [0, 1, 0] }}
-              transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
-              className="hero-secondary-image"
-            >
-              <motion.div
-                key={secondaryImage}
-                initial={reduce ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0"
-              >
-                <Image src={secondaryImage} alt="تفاصيل عباية نوفا مودا" fill className="object-cover object-center" sizes="190px" />
-              </motion.div>
-            </motion.div>
-
-            <div className="hero-edition-card">
-              <span>THE NOVA EDIT</span>
-              <strong>MODESTY<br/>IN MOTION</strong>
+          {/* Bottom stats */}
+          <div className="mt-16 pt-8 border-t border-white/10 grid grid-cols-3 max-w-lg mx-auto">
+            <div className="text-center">
+              <div className="text-[22px] font-bold">+500</div>
+              <div className="text-[11px] text-white/40 tracking-wide mt-1">عميلة راضية</div>
             </div>
-            <div className="hero-number-card"><span>20</span><b>30</b></div>
-            <div className="hero-orbit hero-orbit-a" />
-            <div className="hero-orbit hero-orbit-b" />
+            <div className="text-center border-x border-white/10">
+              <div className="text-[22px] font-bold">2025</div>
+              <div className="text-[11px] text-white/40 tracking-wide mt-1">تشكيلة جديدة</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[22px] font-bold">100%</div>
+              <div className="text-[11px] text-white/40 tracking-wide mt-1">جودة عالية</div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
+export default Hero;

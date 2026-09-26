@@ -1,45 +1,54 @@
 // @ts-nocheck
+// FINAL - JOD للزبون و JOD للبيكسل والكتالوج - عشان يطابق 100%
 "use client"
-import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import FacebookViewContent from "@/components/facebook-viewcontent"
 import { useCart } from "@/components/cart-provider"
 import { imageKitUrl } from "@/lib/utils"
 
-export function ProductDetailClient({ product, settings }: any) {
-  const [qty, setQty] = useState(1)
-  const cart: any = useCart()
-  const [selectedSize, setSelectedSize] = useState("")
-  const [activeImg, setActiveImg] = useState(0)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+export function ProductDetailClient({ product }: any) {
+  const [selectedSize, setSelectedSize] = useState<string>("")
+  const [failed, setFailed] = useState<Record<string, boolean>>({})
+  const { addToCart } = useCart() || { addToCart: () => {} }
 
-  // فلتر الصور الفاضية اللي بتعمل 400
-  const rawImages = product?.images || []
-  const filtered = rawImages.filter((u: string) => u && u.startsWith("http"))
-  const images = filtered.length ? filtered : ["/placeholder.svg"]
-  const sizes: string[] = product?.sizes || []
-  const price = product?.price || 0
-  const compareAt = product?.compare_at_price
+  const images = (product?.images || []).filter(Boolean)
+  const priceJOD = Number(product?.price || 0)
+
+  // ViewContent - JOD
+  useEffect(() => {
+    if (!product?.id ||!priceJOD) return
+    try {
+      // @ts-ignore
+      if (typeof window!== 'undefined' && window.fbq) {
+        window.fbq('track', 'ViewContent', {
+          content_ids: [String(product.id)], // لازم يطابق id في الكتالوج 100%
+          content_type: 'product',
+          value: Number(priceJOD.toFixed(3)), // JOD = 3 خانات
+          currency: 'JOD' // نفس عملة الكتالوج
+        })
+      }
+    } catch {}
+  }, [product?.id, priceJOD])
 
   const handleAddToCart = () => {
-    const p = { ...product, selectedSize, size: selectedSize }
-    const cleanId = String(product.id || product.product_id || "").trim()
-    const totalValue = (Number(price) || 0) * (qty || 1)
-    if (cart.addToCart) cart.addToCart(p, selectedSize, qty)
-    else if (cart.addItem) cart.addItem(p, qty)
-    else if (cart.add) cart.add(p, qty)
-    if (typeof window !== "undefined" && (window as any).fbq && cleanId) {
-      (window as any).fbq('track', 'AddToCart', {
-        content_ids: [cleanId],
-        content_type: 'product',
-        content_name: String(product.name || cleanId),
-        value: Number(totalValue.toFixed(2)),
-        currency: 'USD',
-      })
-      console.log("AddToCart fired", cleanId, totalValue)
+    if(product?.sizes?.length &&!selectedSize){
+      alert('اختاري المقاس');
+      return;
     }
+    addToCart(product, selectedSize, 1)
+
+    try {
+      // @ts-ignore
+      if (typeof window!== 'undefined' && window.fbq) {
+        window.fbq('track', 'AddToCart', {
+          content_ids: [String(product.id)],
+          content_type: 'product',
+          value: Number(priceJOD.toFixed(3)),
+          currency: 'JOD'
+        })
+      }
+    } catch {}
   }
 
   return (
@@ -79,24 +88,21 @@ export function ProductDetailClient({ product, settings }: any) {
           {sizes.length > 0 && (
             <div className="mt-6">
               <div className="text-sm mb-2">المقاس</div>
-              <div className="flex gap-2 flex-wrap">
-                {sizes.map((s: string) => (
-                  <button key={s} onClick={() => setSelectedSize(s)} className={`px-4 h-10 rounded-full border text-sm ${selectedSize===s ? "bg-black text-white":"bg-white"}`}>{s}</button>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((s: string) => (
+                  <button key={s} onClick={()=>setSelectedSize(s)} className={`px-4 h-9 rounded-full border text-sm ${selectedSize===s?'bg-black text-white':'bg-white'}`}>{s}</button>
                 ))}
               </div>
             </div>
           )}
-          <div className="flex gap-3 mt-8">
-            <div className="flex items-center border rounded-full h-12 px-1">
-              <button onClick={() => setQty(Math.max(1, qty-1))} className="w-10 h-10">-</button>
-              <span className="w-8 text-center text-sm">{qty}</span>
-              <button onClick={() => setQty(qty+1)} className="w-10 h-10">+</button>
-            </div>
-            <button onClick={handleAddToCart} className="flex-1 h-12 rounded-full bg-black text-white">أضف للسلة</button>
-          </div>
-          {product?.description && <div className="mt-8 text-sm text-gray-600 whitespace-pre-line">{product.description}</div>}
+          <p className="mt-6 text-sm text-gray-600 whitespace-pre-line">{product?.description||''}</p>
+          <button onClick={handleAddToCart} className="mt-8 w-full h-12 rounded-full bg-black text-white">
+            أضف للسلة - {priceJOD.toFixed(3)} JOD
+          </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }
+
+export default ProductDetailClient

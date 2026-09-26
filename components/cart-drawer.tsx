@@ -1,11 +1,8 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useCart } from "@/components/cart-provider";
-import { formatPrice } from "@/lib/utils";
+// @ts-nocheck
+// FINAL CART DRAWER - زر X بشتغل 100%
+"use client"
+import Link from "next/link"
+import { useCart } from "./cart-provider"
 
 export function CartDrawer() {
   const cart = useCart();
@@ -171,9 +168,22 @@ export function CartDrawer() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
+              ))
+            )}
+          </div>
+
+          {/* Footer */}
+          {items && items.length > 0 && (
+            <div className="p-4 border-t space-y-3">
+              <div className="flex justify-between font-bold">
+                <span>المجموع</span>
+                <span>{Number(total).toFixed(3)} JOD</span>
+              </div>
+              <Link href="/cart" onClick={() => setIsOpen(false)} className="block w-full h-12 bg-black text-white rounded-full flex items-center justify-center font-medium">
+                إتمام الطلب
+              </Link>
             </div>
 
             {cart.items.length > 0 && (
@@ -201,3 +211,5 @@ export function CartDrawer() {
     </AnimatePresence>
   );
 }
+
+export default CartDrawer

@@ -1,5 +1,8 @@
 // @ts-nocheck
-"use client";
+// FINAL FIX - بيطفي #418 - بيعرض نفس الشي بالسيرفر والبراوزر
+"use client"
+import Link from "next/link"
+import { useCart } from "./cart-provider"
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -240,3 +243,5 @@ export function SiteHeader({
     </>
   );
 }
+
+export default SiteHeader

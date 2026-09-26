@@ -1,27 +1,25 @@
-import type { Metadata } from "next"
-import { Tajawal } from "next/font/google"
-import "./globals.css"
-import { CartProvider } from "@/components/cart-provider"
-import { Toaster } from "@/components/ui/toaster"
-import MetaPixel from "@/components/meta-pixel"
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
-const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400","500","700"] })
+import type { Metadata } from "next";
+import { Inter, Tajawal } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const tajawal = Tajawal({ weight: ["400","500","700"], subsets: ["arabic"], variable: "--font-tajawal" });
 
 export const metadata: Metadata = {
-  title: "نوفا مودا - عبايات",
-  description: "متجر عبايات",
-}
+  title: "Nova Moda Abaya",
+  description: "عبايات مصممة بعناية",
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={tajawal.className}>
-        <MetaPixel />
-        <CartProvider>
-          {children}
-          <Toaster />
-        </CartProvider>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body className={`${inter.variable} ${tajawal.variable} antialiased`} suppressHydrationWarning>
+        {children}
       </body>
     </html>
-  )
+  );
 }
